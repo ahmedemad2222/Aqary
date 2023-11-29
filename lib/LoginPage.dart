@@ -31,7 +31,7 @@ class MyHomePage extends StatelessWidget {
             children: <Widget>[
               Center(
                 child: Image.asset(
-                  'assets/Group_2.png', // Update the path based on your project structure
+                  'assets/Group_2.png', 
                   width: 150.0, 
                   height: 150.0,
                 ),
