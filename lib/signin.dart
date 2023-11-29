@@ -1,13 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/PreHomeScreen.dart';
 
 class SignInPage extends StatelessWidget {
-  SignInPage({Key? key});
-
-  // Declare controllers for email and password
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  const SignInPage({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +26,13 @@ class SignInPage extends StatelessWidget {
               Center(
                 child: Image.asset(
                   'assets/Group_2.png',
-                  width: 150.0,
+                  width: 150.0, 
                   height: 150.0,
                 ),
               ),
               Expanded(
-                child: ListView(
-                  shrinkWrap: true,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextFormField(
                       decoration: const InputDecoration(
@@ -55,7 +49,6 @@ class SignInPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20.0),
                     TextFormField(
-                      controller: _emailController,
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         labelStyle: TextStyle(color: Colors.black),
@@ -70,7 +63,6 @@ class SignInPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20.0),
                     TextFormField(
-                      controller: _passwordController,
                       decoration: const InputDecoration(
                         labelText: 'Password',
                         labelStyle: TextStyle(color: Colors.black),
@@ -102,7 +94,7 @@ class SignInPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 40.0),
+              const SizedBox(height: 40.0), // Adjust the space between the text fields and the button
               Align(
                 alignment: Alignment.centerRight,
                 child: Container(
@@ -111,18 +103,7 @@ class SignInPage extends StatelessWidget {
                   margin: EdgeInsets.only(bottom: 20.0),
                   child: IconButton(
                     onPressed: () {
-                      print('Email: ${_emailController.text}');
-                      print('Password: ${_passwordController.text}');
-                      FirebaseAuth.instance
-                          .createUserWithEmailAndPassword(
-                              email: _emailController.text,
-                              password: _passwordController.text)
-                          .then((value) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PreHomeScreen()));
-                      });
+                      // Implement your sign-up logic here
                     },
                     icon: Icon(
                       Icons.arrow_forward,
