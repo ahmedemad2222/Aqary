@@ -9,7 +9,10 @@ class SearchPage extends StatelessWidget {
           title: Text('Search'),
           backgroundColor: Color(0xFFF9CF93),
         ),
-        body: SearchContent(),
+        body: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: SearchContent(),
+        ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Color(0xFF514D47),
           selectedItemColor: Color(0xFFF9CF93),
@@ -83,36 +86,34 @@ class _SearchContentState extends State<SearchContent> {
             ],
           ),
         ),
-        Expanded(
-          child: Container(
-            margin: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              color: Colors.white,
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildOptionButton('Rent'),
-                      buildSeparator(),
-                      buildOptionButton('Buy'),
-                    ],
-                  ),
-                  SizedBox(height: 16.0),
-                  buildSearchBar(),
-                  SizedBox(height: 16.0),
-                  selectedOption == 'Rent'
-                      ? buildRentOptions()
-                      : buildBuyOptions(),
-                  SizedBox(height: 16.0),
-                  buildSearchButton(),
-                ],
-              ),
+        Container(
+          margin: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.0),
+            color: Colors.white,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    buildOptionButton('Rent'),
+                    buildSeparator(),
+                    buildOptionButton('Buy'),
+                  ],
+                ),
+                SizedBox(height: 16.0),
+                buildSearchBar(),
+                SizedBox(height: 16.0),
+                selectedOption == 'Rent'
+                    ? buildRentOptions()
+                    : buildBuyOptions(),
+                SizedBox(height: 16.0),
+                buildSearchButton(),
+              ],
             ),
           ),
         ),
