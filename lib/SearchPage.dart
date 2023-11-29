@@ -11,21 +11,21 @@ class SearchPage extends StatelessWidget {
         ),
         body: SearchContent(),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Color(0xFF514D47),
+          selectedItemColor: Color(0xFFF9CF93),
+          unselectedItemColor: Colors.black,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.black),
+              icon: Icon(Icons.home),
               label: 'Home',
-              activeIcon: Icon(Icons.home, color: Color(0xFFF9CF93)),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat, color: Colors.black),
+              icon: Icon(Icons.chat),
               label: 'Chat',
-              activeIcon: Icon(Icons.chat, color: Color(0xFFF9CF93)),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person, color: Colors.black),
+              icon: Icon(Icons.person),
               label: 'Profile',
-              activeIcon: Icon(Icons.person, color: Color(0xFFF9CF93)),
             ),
           ],
         ),
@@ -110,29 +110,6 @@ class _SearchContentState extends State<SearchContent> {
                       ? buildRentOptions()
                       : buildBuyOptions(),
                   SizedBox(height: 16.0),
-                  
-                  /*Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildRoomButton(1),
-                      buildRoomButton(2),
-                      buildRoomButton(3),
-                      buildRoomButton(4),
-                      buildRoomButton(5, isPlus: true),
-                    ],
-                  ),
-                  SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      buildToiletButton(1),
-                      buildToiletButton(2),
-                      buildToiletButton(3),
-                      buildToiletButton(4),
-                      buildToiletButton(5, isPlus: true),
-                    ],
-                  ), */
-                  //SizedBox(height: 16.0),
                   buildSearchButton(),
                 ],
               ),
@@ -195,28 +172,34 @@ class _SearchContentState extends State<SearchContent> {
         SizedBox(height: 16.0),
         Text('Number of Rooms: $selectedRooms'),
         SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildRoomButton(1),
-            buildRoomButton(2),
-            buildRoomButton(3),
-            buildRoomButton(4),
-            buildRoomButton(5, isPlus: true),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildRoomButton(1),
+              buildRoomButton(2),
+              buildRoomButton(3),
+              buildRoomButton(4),
+              buildRoomButton(5, isPlus: true),
+            ],
+          ),
         ),
         SizedBox(height: 16.0),
         Text('Number of Toilets: $selectedToilets'),
         SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildToiletButton(1),
-            buildToiletButton(2),
-            buildToiletButton(3),
-            buildToiletButton(4),
-            buildToiletButton(5, isPlus: true),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildToiletButton(1),
+              buildToiletButton(2),
+              buildToiletButton(3),
+              buildToiletButton(4),
+              buildToiletButton(5, isPlus: true),
+            ],
+          ),
         ),
       ],
     );
@@ -229,28 +212,34 @@ class _SearchContentState extends State<SearchContent> {
         SizedBox(height: 16.0),
         Text('Number of Rooms: $selectedRooms'),
         SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildRoomButton(1),
-            buildRoomButton(2),
-            buildRoomButton(3),
-            buildRoomButton(4),
-            buildRoomButton(5, isPlus: true),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildRoomButton(1),
+              buildRoomButton(2),
+              buildRoomButton(3),
+              buildRoomButton(4),
+              buildRoomButton(5, isPlus: true),
+            ],
+          ),
         ),
         SizedBox(height: 16.0),
         Text('Number of Toilets: $selectedToilets'),
         SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            buildToiletButton(1),
-            buildToiletButton(2),
-            buildToiletButton(3),
-            buildToiletButton(4),
-            buildToiletButton(5, isPlus: true),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildToiletButton(1),
+              buildToiletButton(2),
+              buildToiletButton(3),
+              buildToiletButton(4),
+              buildToiletButton(5, isPlus: true),
+            ],
+          ),
         ),
       ],
     );
