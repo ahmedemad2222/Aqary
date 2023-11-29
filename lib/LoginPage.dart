@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/HomeScreen.dart';
 
 class MyHomePage extends StatelessWidget {
   final String title;
@@ -32,7 +33,7 @@ class MyHomePage extends StatelessWidget {
               Center(
                 child: Image.asset(
                   'assets/Group_2.png', // Update the path based on your project structure
-                  width: 150.0, 
+                  width: 150.0,
                   height: 150.0,
                 ),
               ),
@@ -104,7 +105,11 @@ class MyHomePage extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        // Implement your sign-up logic here
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomeScreen()),
+                        );
                       },
                       icon: Icon(
                         Icons.arrow_forward,
