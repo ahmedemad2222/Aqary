@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/NavBar.dart';
 
 class ApartmentWidget extends StatelessWidget {
   final String name;
@@ -149,21 +150,13 @@ class _BrowsePageState extends State<BrowsePage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFD6CBBB),
-        items: <BottomNavigationBarItem>[
-          buildBottomNavigationBarItem(Icons.home, 'Home', 0),
-          buildBottomNavigationBarItem(Icons.chat, 'Chat', 1),
-          buildBottomNavigationBarItem(Icons.person, 'Profile', 2),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        selectedItemColor: Color.fromRGBO(210, 158, 86, 1),
-        unselectedItemColor: Colors.black,
       ),
     );
   }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Browse.dart';
+import 'package:flutter_application_1/BuyPage.dart';
+import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/SearchPage.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -37,7 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     IconButton(
                       icon: Icon(Icons.search),
                       onPressed: () {
-                        // Handle search button tap
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SearchPage()),
+                        );
                       },
                     ),
                     IconButton(
@@ -59,7 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   InkWell(
                     onTap: () {
-                      // Handle button tap for 'House'
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BrowsePage()),
+                        );
                     },
                     child: CategoryButton(
                       category: 'House',
@@ -69,7 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   InkWell(
                     onTap: () {
-                      // Handle button tap for 'Apartments'
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BuyPage()),
+                        );
                     },
                     child: CategoryButton(
                       category: 'Apartments',
@@ -105,53 +118,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFD6CBBB),
-        items: [
-          buildBottomNavigationBarItem(Icons.home, 'Home', 0),
-          buildBottomNavigationBarItem(Icons.chat, 'Chat', 1),
-          buildBottomNavigationBarItem(Icons.person, 'Profile', 2),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
             currentIndex = index;
           });
         },
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
       ),
-    );
-  }
-
-  BottomNavigationBarItem buildBottomNavigationBarItem(
-      IconData icon, String label, int index) {
-    return BottomNavigationBarItem(
-      icon: Stack(
-        children: [
-          Icon(
-            icon,
-            color: Colors.black,
-          ),
-          if (index == currentIndex)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFF9CF93),
-                ),
-                child: Text(''),
-              ),
-            ),
-        ],
-      ),
-      label: label,
     );
   }
 }
+
+  
 
 class CategoryButton extends StatelessWidget {
   final String category;
