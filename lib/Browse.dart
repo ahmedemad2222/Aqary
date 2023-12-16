@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/NavBar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/HomeScreen.dart';
+import 'package:flutter_application_1/NavBar.dart' as NavBar;
+import 'package:flutter_application_1/SearchPage.dart';
 
 class ApartmentWidget extends StatelessWidget {
   final String name;
@@ -56,8 +59,46 @@ class BrowsePage extends StatefulWidget {
 }
 
 class _BrowsePageState extends State<BrowsePage> {
-  int _currentIndex = 0;
+  int _mainNavigationBarIndex = 0;
+  int _rentBuyIndex = 0;
+
   bool _isLocationExpanded = false;
+
+  // List to store fetched data from Firebase
+  List<Map<String, dynamic>> apartments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Call the function to fetch data when the widget is first initialized
+    fetchData();
+  }
+
+  // Function to fetch data from Firebase
+  Future<void> fetchData() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference buildings = firestore.collection('Buildings');
+
+    QuerySnapshot querySnapshot = await buildings.get();
+
+    // Clear the existing data before adding new data
+    apartments.clear();
+
+    // Iterate through the documents and add them to the list
+    querySnapshot.docs.forEach((document) {
+      Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+
+      // Check if the type matches the selected category ("Rent" or "Buy")
+      if (_rentBuyIndex == 0 && data['Type'] == 'Rent') {
+        apartments.add(data);
+      } else if (_rentBuyIndex == 1 && data['Type'] == 'Sell') {
+        apartments.add(data);
+      }
+    });
+
+    // Update the state to trigger a rebuild of the UI
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,17 +128,27 @@ class _BrowsePageState extends State<BrowsePage> {
 
           // Main Content (Apartments)
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: EdgeInsets.all(16),
-              children: [
-                ApartmentWidget(name: 'Apartment 1', price: 'Price: \$1000', bathrooms: 2, bedrooms: 1),
-                SizedBox(height: 16),
-                ApartmentWidget(name: 'Apartment 2', price: 'Price: \$1200', bathrooms: 3, bedrooms: 2),
-                SizedBox(height: 16),
-                ApartmentWidget(name: 'Apartment 3', price: 'Price: \$1250', bathrooms: 3, bedrooms: 2),
-                SizedBox(height: 16),
-                ApartmentWidget(name: 'Apartment 4', price: 'Price: \$1500', bathrooms: 3, bedrooms: 2),
-              ],
+              itemCount: apartments.length,
+              itemBuilder: (context, index) {
+                // Extract data from the list
+                String name = apartments[index]['Name'];
+                String price = 'Price: \$${apartments[index]['Price']}';
+                int bathrooms = int.parse(apartments[index]['Bathrooms'].toString());
+                int bedrooms = int.parse(apartments[index]['rooms'].toString());
+
+                // Return ApartmentWidget with fetched data
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 16), // Adjust the bottom padding as needed
+                  child: ApartmentWidget(
+                    name: name,
+                    price: price,
+                    bathrooms: bathrooms,
+                    bedrooms: bedrooms,
+                  ),
+                );
+              },
             ),
           ),
 
@@ -150,11 +201,11 @@ class _BrowsePageState extends State<BrowsePage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
+      bottomNavigationBar: NavBar.CustomBottomNavigationBar(
+        currentIndex: _mainNavigationBarIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            _mainNavigationBarIndex = index;
           });
         },
       ),
@@ -178,14 +229,15 @@ class _BrowsePageState extends State<BrowsePage> {
   }
 
   Widget _buildCategoryButton(String category) {
-    bool isSelected = category == (_currentIndex == 0 ? 'Rent' : 'Buy');
+    bool isSelected = category == (_rentBuyIndex == 0 ? 'Rent' : 'Buy');
 
     return GestureDetector(
       onTap: () {
         // Handle category button click
         print('Category: $category clicked');
         setState(() {
-          _currentIndex = category == 'Rent' ? 0 : 1;
+          _rentBuyIndex = category == 'Rent' ? 0 : 1;
+          fetchData(); // Call fetchData when the category changes
         });
       },
       child: Container(
@@ -200,35 +252,6 @@ class _BrowsePageState extends State<BrowsePage> {
           style: TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
         ),
       ),
-    );
-  }
-
-  BottomNavigationBarItem buildBottomNavigationBarItem(
-    IconData icon, String label, int index,
-  ) {
-    return BottomNavigationBarItem(
-      icon: Stack(
-        children: [
-          Icon(
-            icon,
-            color: Colors.black,
-          ),
-          if (index == _currentIndex)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromRGBO(249, 207, 147, 1),
-                ),
-                child: Text(''),
-              ),
-            ),
-        ],
-      ),
-      label: label,
     );
   }
 }

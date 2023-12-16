@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Browse.dart';
 import 'package:flutter_application_1/BuyPage.dart';
-import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/NavBar.dart' as NavBar; // Use 'as' to provide an alias
 import 'package:flutter_application_1/SearchPage.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -67,9 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   InkWell(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => BrowsePage()),
-                        );
+                        context,
+                        MaterialPageRoute(builder: (context) => BrowsePage()),
+                      );
                     },
                     child: CategoryButton(
                       category: 'House',
@@ -80,9 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   InkWell(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => BuyPage()),
-                        );
+                        context,
+                        MaterialPageRoute(builder: (context) => BuyPage()),
+                      );
                     },
                     child: CategoryButton(
                       category: 'Apartments',
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
+      bottomNavigationBar: NavBar.CustomBottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
@@ -129,8 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-  
 
 class CategoryButton extends StatelessWidget {
   final String category;
