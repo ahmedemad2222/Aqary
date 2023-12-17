@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PreHomeScreen.dart';
@@ -7,8 +8,10 @@ class SignInPage extends StatelessWidget {
 
   // Declare controllers for email and password
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +44,7 @@ class SignInPage extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     TextFormField(
+                      controller: _nameController,
                       decoration: const InputDecoration(
                         labelText: 'Name',
                         labelStyle: TextStyle(color: Colors.black),
@@ -113,11 +117,21 @@ class SignInPage extends StatelessWidget {
                     onPressed: () {
                       print('Email: ${_emailController.text}');
                       print('Password: ${_passwordController.text}');
-                      FirebaseAuth.instance
+                      _firebaseAuth
                           .createUserWithEmailAndPassword(
                               email: _emailController.text,
                               password: _passwordController.text)
-                          .then((value) {
+                          .then((UserCredential authResult) {
+                        _firestore
+                            .collection('users')
+                            .doc(authResult.user!.uid)
+                            .set({
+                          'name': _nameController.text,
+                          'email': _emailController.text,
+                          'uid': authResult.user!.uid,
+                          // Add other fields as needed
+                        });
+                        //here
                         Navigator.push(
                             context,
                             MaterialPageRoute(
