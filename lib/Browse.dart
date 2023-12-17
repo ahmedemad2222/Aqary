@@ -67,6 +67,8 @@ class _BrowsePageState extends State<BrowsePage> {
   // List to store fetched data from Firebase
   List<Map<String, dynamic>> apartments = [];
 
+  String _selectedLocation = ''; // Store the selected location
+
   @override
   void initState() {
     super.initState();
@@ -88,10 +90,9 @@ class _BrowsePageState extends State<BrowsePage> {
     querySnapshot.docs.forEach((document) {
       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-      // Check if the type matches the selected category ("Rent" or "Buy")
-      if (_rentBuyIndex == 0 && data['Type'] == 'Rent') {
-        apartments.add(data);
-      } else if (_rentBuyIndex == 1 && data['Type'] == 'Sell') {
+      // Check if the type matches the selected category ("Rent" or "Buy") and the location matches
+      if ((_rentBuyIndex == 0 && data['Type'] == 'Rent' || _rentBuyIndex == 1 && data['Type'] == 'Sell') &&
+          (_selectedLocation.isEmpty || data['Location'] == _selectedLocation)) {
         apartments.add(data);
       }
     });
@@ -178,7 +179,7 @@ class _BrowsePageState extends State<BrowsePage> {
                     });
                   },
                   child: Text(
-                    _isLocationExpanded ? 'Cairo, Egypt' : 'Cairo',
+                    _isLocationExpanded ? 'Egypt' : 'Egypt',
                     style: TextStyle(fontSize: 14, color: Colors.blue),
                   ),
                 ),
@@ -193,9 +194,13 @@ class _BrowsePageState extends State<BrowsePage> {
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
-                      _buildRecentLocation('Maadi, Cairo, Egypt'),
-                      _buildRecentLocation('Another Location'),
-                      _buildRecentLocation('Yet Another Location'),
+                      _buildRecentLocation('Maadi'), 
+                      _buildRecentLocation('Obour'), 
+                      _buildRecentLocation('Aswan'), 
+                      _buildRecentLocation('Alex'),
+                      _buildRecentLocation('Tagamoa'), 
+                      _buildRecentLocation('Madint Nast'),
+                      _buildRecentLocation('Masr Algededa'),
                     ],
                   ),
               ],
@@ -221,10 +226,14 @@ class _BrowsePageState extends State<BrowsePage> {
         onTap: () {
           // Handle recent location click
           print('Recent Location: $location clicked');
+          setState(() {
+            _selectedLocation = location;
+            fetchData(); // Call fetchData when the location changes
+          });
         },
         child: Text(
           location,
-          style: TextStyle(fontSize: 14, color: Colors.blue),
+          style: TextStyle(fontSize: 14, color: _selectedLocation == location ? Colors.blue : Colors.black),
         ),
       ),
     );
