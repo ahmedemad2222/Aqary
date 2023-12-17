@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/NavBar.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -6,6 +7,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  int currentIndex = 0;
   // Define controllers for the editable fields
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -81,33 +83,26 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFD6CBBB),
-        items: <BottomNavigationBarItem>[
-          buildBottomNavigationBarItem(Icons.home, 'Home', 0),
-          buildBottomNavigationBarItem(Icons.chat, 'Chat', 1),
-          buildBottomNavigationBarItem(Icons.person, 'Profile', 2),
-        ],
-        currentIndex: _currentIndex,
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: currentIndex,
         onTap: (index) {
-          // Handle navigation bar item tap if needed
-          // You may navigate to different pages based on the index
+          setState(() {
+            currentIndex = index;
+          });
         },
-        selectedItemColor: Color.fromRGBO(210, 158, 86, 1),
-        unselectedItemColor: Colors.black,
       ),
     );
   }
 
-  int _currentIndex = 2;
+  // int _currentIndex = 2;
 
-  BottomNavigationBarItem buildBottomNavigationBarItem(
-      IconData icon, String label, int index) {
-    return BottomNavigationBarItem(
-      icon: Icon(icon),
-      label: label,
-    );
-  }
+  // BottomNavigationBarItem buildBottomNavigationBarItem(
+  //     IconData icon, String label, int index) {
+  //   return BottomNavigationBarItem(
+  //     icon: Icon(icon),
+  //     label: label,
+  //   );
+  // }
 
   Widget buildProfileInfoRow(String label, String value, {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
     return Padding(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
+import 'package:flutter_application_1/profile.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -29,10 +30,16 @@ class CustomBottomNavigationBar extends StatelessWidget {
             );
             break;
           case 1:
-            
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ChatScreen()),
+            );
             break;
           case 2:
-            
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ProfilePage()),
+            );
             break;
           default:
             break;
