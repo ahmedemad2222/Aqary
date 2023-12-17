@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Aqary'),
+        backgroundColor: Color.fromARGB(255, 227, 183, 121),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -81,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyPage()),
+                        MaterialPageRoute(builder: (context) => BuyPage(apartmentId: '2wHoqLzpcpmiYV7I8oHu')),
                       );
                     },
                     child: CategoryButton(
