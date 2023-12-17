@@ -133,10 +133,10 @@ class _BrowsePageState extends State<BrowsePage> {
               itemCount: apartments.length,
               itemBuilder: (context, index) {
                 // Extract data from the list
-                String name = apartments[index]['Name'];
+                String name = apartments[index]['Title'];
                 String price = 'Price: \$${apartments[index]['Price']}';
-                int bathrooms = int.parse(apartments[index]['Bathrooms'].toString());
-                int bedrooms = int.parse(apartments[index]['rooms'].toString());
+                int bathrooms = (apartments[index]['Bathrooms']);
+                int bedrooms = (apartments[index]['rooms']);
 
                 // Return ApartmentWidget with fetched data
                 return Padding(
