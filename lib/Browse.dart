@@ -133,14 +133,15 @@ class _BrowsePageState extends State<BrowsePage> {
               itemCount: apartments.length,
               itemBuilder: (context, index) {
                 // Extract data from the list
-                String name = apartments[index]['Title'];
+                String name = apartments[index]['Name'];
                 String price = 'Price: \$${apartments[index]['Price']}';
                 int bathrooms = (apartments[index]['Bathrooms']);
                 int bedrooms = (apartments[index]['rooms']);
 
                 // Return ApartmentWidget with fetched data
                 return Padding(
-                  padding: EdgeInsets.only(bottom: 16), // Adjust the bottom padding as needed
+                  padding: EdgeInsets.only(
+                      bottom: 16), // Adjust the bottom padding as needed
                   child: ApartmentWidget(
                     name: name,
                     price: price,
@@ -188,7 +189,8 @@ class _BrowsePageState extends State<BrowsePage> {
                     children: [
                       Text(
                         'Recents:',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
                       _buildRecentLocation('Maadi, Cairo, Egypt'),
@@ -249,7 +251,8 @@ class _BrowsePageState extends State<BrowsePage> {
         ),
         child: Text(
           category,
-          style: TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
+          style:
+              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
         ),
       ),
     );
