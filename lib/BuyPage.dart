@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BuyPage extends StatefulWidget {
   final String apartmentId;
+
   BuyPage({required this.apartmentId});
 
   @override
@@ -14,6 +16,7 @@ class BuyPage extends StatefulWidget {
 class _BuyPage extends State<BuyPage> {
   int currentIndex = 0;
   late Future<Map<String, dynamic>> apartmentData;
+  late GoogleMapController mapController;
 
   @override
   void initState() {
@@ -29,6 +32,16 @@ class _BuyPage extends State<BuyPage> {
 
     // Store the apartment data
     return documentSnapshot.data() as Map<String, dynamic>;
+  }
+
+  Future<void> _openGoogleMaps(double latitude, double longitude) async {
+    final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+
+    if (await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
+      print('Could not open Google Maps.');
+    }
   }
 
   @override
@@ -71,7 +84,7 @@ class _BuyPage extends State<BuyPage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/buyimage.jpg'),
+                          image: AssetImage('assets/buypage.jpg'),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -79,7 +92,7 @@ class _BuyPage extends State<BuyPage> {
                   ),
                 ),
                 Positioned.fill(
-                  top: 165,
+                  top: 185,
                   bottom: 0,
                   child: Padding(
                     padding: EdgeInsets.all(1.0),
@@ -88,8 +101,8 @@ class _BuyPage extends State<BuyPage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(53),
-                          topRight: Radius.circular(53),
+                          topLeft: Radius.circular(23),
+                          topRight: Radius.circular(23),
                           bottomLeft: Radius.zero,
                           bottomRight: Radius.zero,
                         ),
@@ -139,14 +152,15 @@ class _BuyPage extends State<BuyPage> {
                                         GestureDetector(
                                           onTap: () {
                                             // Handle the click on the location here
-                                            
-                                            print('Location clicked');
+                                            double latitude = 40.689247; // Replace with the actual latitude key
+                                            double longitude = -74.044502; // Replace with the actual longitude key
+                                            _openGoogleMaps(latitude, longitude);
                                           },
                                           child: Text(
                                             'Location: ${apartmentData['Location'] ?? 'Unknown'}',
                                             style: TextStyle(
                                               fontSize: 16,
-                                              color: const Color.fromARGB(255, 0, 0, 0), // Change the color as desired
+                                              color: const Color.fromARGB(255, 0, 0, 0),
                                             ),
                                           ),
                                         ),
@@ -168,14 +182,10 @@ class _BuyPage extends State<BuyPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                DetailContainer(
-                                    '${apartmentData['rooms']} Rooms'),
-                                DetailContainer(
-                                    '${apartmentData['Bathrooms']} Bathrooms'),
-                                DetailContainer(
-                                    '${apartmentData['Parking']} Parking'),
-                                DetailContainer(
-                                    '${apartmentData['Kitchens']} Kitchen'),
+                                DetailContainer('${apartmentData['rooms']} Rooms'),
+                                DetailContainer('${apartmentData['Bathrooms']} Bathrooms'),
+                                DetailContainer('${apartmentData['Parking']} Parking'),
+                                DetailContainer('${apartmentData['Kitchens']} Kitchen'),
                               ],
                             ),
                             SizedBox(height: 16),
