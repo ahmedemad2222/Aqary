@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Browse.dart';
 import 'package:flutter_application_1/BuyPage.dart';
 import 'package:flutter_application_1/NavBar.dart' as NavBar; // Use 'as' to provide an alias
+import 'package:flutter_application_1/Search.dart';
 import 'package:flutter_application_1/SearchPage.dart';
+import 'package:flutter_application_1/Sell_lese.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -44,14 +46,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SearchPage()),
+                          MaterialPageRoute(builder: (context) => Search()),
                         );
                       },
                     ),
                     IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
-                        // Handle add button tap
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Sell_lese()),
+                        );
                       },
                     ),
                   ],

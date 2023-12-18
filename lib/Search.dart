@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Browse.dart';
 import 'package:flutter_application_1/BrowseSearch.dart';
 import 'package:flutter_application_1/NavBar.dart';
-import 'package:flutter_application_1/Test2.dart';
 
 class Search extends StatefulWidget {
   Search({Key? key}) : super(key: key);
