@@ -91,6 +91,7 @@ class _BrowsePageState extends State<BrowsePage> {
     querySnapshot.docs.forEach((document) {
       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
+
       // Add the document ID to the data
       data['documentId'] = document.id;
 
@@ -99,6 +100,7 @@ class _BrowsePageState extends State<BrowsePage> {
               _rentBuyIndex == 1 && data['Type'] == 'Sell') &&
           (_selectedLocation.isEmpty ||
               data['Location'] == _selectedLocation)) {
+
         apartments.add(data);
       }
     });
@@ -212,11 +214,13 @@ class _BrowsePageState extends State<BrowsePage> {
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
+
                       _buildRecentLocation('Maadi'),
                       _buildRecentLocation('Obour'),
                       _buildRecentLocation('Aswan'),
                       _buildRecentLocation('Alex'),
                       _buildRecentLocation('Tagamoa'),
+
                       _buildRecentLocation('Madint Nast'),
                       _buildRecentLocation('Masr Algededa'),
                     ],
@@ -251,10 +255,12 @@ class _BrowsePageState extends State<BrowsePage> {
         },
         child: Text(
           location,
+
           style: TextStyle(
               fontSize: 14,
               color:
                   _selectedLocation == location ? Colors.blue : Colors.black),
+
         ),
       ),
     );
