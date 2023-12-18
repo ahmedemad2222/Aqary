@@ -54,21 +54,28 @@ class ApartmentWidget extends StatelessWidget {
   }
 }
 
-class BrowsePage extends StatefulWidget {
+class BrowseSearch extends StatefulWidget {
+  final String rentBuyOption;
+  final int selectedBedrooms;
+  final int selectedBathrooms;
+  final String searchQuery;
+
+  BrowseSearch({
+    required this.rentBuyOption,
+    required this.selectedBedrooms,
+    required this.selectedBathrooms,
+    required this.searchQuery,
+  });
+
   @override
-  _BrowsePageState createState() => _BrowsePageState();
+  _BrowseSearchState createState() => _BrowseSearchState();
 }
 
-class _BrowsePageState extends State<BrowsePage> {
+class _BrowseSearchState extends State<BrowseSearch> {
   int _mainNavigationBarIndex = 0;
-  int _rentBuyIndex = 0;
-
-  bool _isLocationExpanded = false;
 
   // List to store fetched data from Firebase
   List<Map<String, dynamic>> apartments = [];
-
-  String _selectedLocation = ''; // Store the selected location
 
   @override
   void initState() {
@@ -95,10 +102,14 @@ class _BrowsePageState extends State<BrowsePage> {
       data['documentId'] = document.id;
 
       // Check if the type matches the selected category ("Rent" or "Buy") and the location matches
-      if ((_rentBuyIndex == 0 && data['Type'] == 'Rent' ||
-              _rentBuyIndex == 1 && data['Type'] == 'Sell') &&
-          (_selectedLocation.isEmpty ||
-              data['Location'] == _selectedLocation)) {
+      if ((widget.rentBuyOption == 'Rent' && data['Type'] == 'Rent' ||
+              widget.rentBuyOption == 'Sell' && data['Type'] == 'Sell') &&
+          (widget.selectedBedrooms == 0 ||
+              data['rooms'] == widget.selectedBedrooms) &&
+          (widget.selectedBathrooms == 0 ||
+              data['Bathrooms'] == widget.selectedBathrooms) &&
+          (widget.searchQuery.isEmpty ||
+              data['PropertyType'] == widget.searchQuery)) {
         apartments.add(data);
       }
     });
@@ -117,22 +128,6 @@ class _BrowsePageState extends State<BrowsePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Small Navigation Bar (Rent and Buy)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCategoryButton('Rent'),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('|', style: TextStyle(fontSize: 20)),
-                ),
-                _buildCategoryButton('Buy'),
-              ],
-            ),
-          ),
-
           // Main Content (Apartments)
           Expanded(
             child: ListView.builder(
@@ -144,8 +139,6 @@ class _BrowsePageState extends State<BrowsePage> {
                 String price = 'Price: \$${apartments[index]['Price']}';
                 int bathrooms = (apartments[index]['Bathrooms']);
                 int bedrooms = (apartments[index]['rooms']);
-
-                // Get the building ID from the document ID
 
                 return GestureDetector(
                   onTap: () {
@@ -172,58 +165,6 @@ class _BrowsePageState extends State<BrowsePage> {
               },
             ),
           ),
-          // Location and Recents
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Color(0xFFF9CF93),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(31),
-                topRight: Radius.circular(31),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Location:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 5),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isLocationExpanded = !_isLocationExpanded;
-                    });
-                  },
-                  child: Text(
-                    _isLocationExpanded ? 'Egypt' : 'Egypt',
-                    style: TextStyle(fontSize: 14, color: Colors.blue),
-                  ),
-                ),
-                SizedBox(height: 16),
-                if (_isLocationExpanded)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Recents:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      _buildRecentLocation('Maadi'),
-                      _buildRecentLocation('Obour'),
-                      _buildRecentLocation('Aswan'),
-                      _buildRecentLocation('Alex'),
-                      _buildRecentLocation('Tagamoa'),
-                      _buildRecentLocation('Madint Nast'),
-                      _buildRecentLocation('Masr Algededa'),
-                    ],
-                  ),
-              ],
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: NavBar.CustomBottomNavigationBar(
@@ -233,57 +174,6 @@ class _BrowsePageState extends State<BrowsePage> {
             _mainNavigationBarIndex = index;
           });
         },
-      ),
-    );
-  }
-
-  Widget _buildRecentLocation(String location) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () {
-          // Handle recent location click
-          print('Recent Location: $location clicked');
-          setState(() {
-            _selectedLocation = location;
-            fetchData(); // Call fetchData when the location changes
-          });
-        },
-        child: Text(
-          location,
-          style: TextStyle(
-              fontSize: 14,
-              color:
-                  _selectedLocation == location ? Colors.blue : Colors.black),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryButton(String category) {
-    bool isSelected = category == (_rentBuyIndex == 0 ? 'Rent' : 'Buy');
-
-    return GestureDetector(
-      onTap: () {
-        // Handle category button click
-        print('Category: $category clicked');
-        setState(() {
-          _rentBuyIndex = category == 'Rent' ? 0 : 1;
-          fetchData(); // Call fetchData when the category changes
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected ? Color(0xFFF9CF93) : null,
-        ),
-        child: Text(
-          category,
-          style:
-              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
-        ),
       ),
     );
   }
