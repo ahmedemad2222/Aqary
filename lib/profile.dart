@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
@@ -10,6 +11,47 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   int currentIndex = 0;
+  late String email = '';
+  late String name = '';
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  // Function to fetch data from Firebase
+  Future<Map<String, dynamic>> fetchData() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference users = firestore.collection('users');
+
+      // Get the current user
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Use user.uid to get the UID
+        DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
+
+        if (documentSnapshot.exists) {
+          // Check if the document exists before accessing its data
+          Map<String, dynamic> data =
+              documentSnapshot.data() as Map<String, dynamic>;
+          email = data['email'] ?? 'No Email';
+          name = data['name'] ?? 'No Name';
+          return {'email': email, 'name': name};
+        } else {
+          print('Document does not exist');
+          return {'email': 'No Email', 'name': 'No Name'};
+        }
+      } else {
+        print('User not logged in');
+        return {'email': 'No Email', 'name': 'No Name'};
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      return {'email': 'No Email', 'name': 'No Name'};
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,83 +62,75 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color.fromARGB(255, 227, 183, 121),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage: AssetImage('assets/profile_picture.jpg'),
-                    ),
-                    SizedBox(width: 16.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        child: FutureBuilder(
+          future: fetchData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              // Data fetching is complete, update the email and name
+              email = snapshot.data?['email'] ?? 'No Email';
+              name = snapshot.data?['name'] ?? 'No Name';
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Your existing widget code...
+                  Container(
+                    padding: EdgeInsets.all(16.0),
+                    color: Color.fromARGB(255, 227, 183, 121),
+                    child: Row(
                       children: [
-                        Text(
-                          'Username',
-                          style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage:
+                              AssetImage('assets/profile_picture.jpg'),
                         ),
-                        SizedBox(height: 8.0),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                          ),
-                          child: Text(
-                            'User@gmailcom',
-                            style: TextStyle(fontSize: 20.0, color: Colors.black),
-                          ),
-                        ),
+                        SizedBox(width: 16.0),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color.fromARGB(255, 227, 183, 121),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildProfileInfoRow('Name', 'John Doe', labelFontSize: 20.0, valueFontSize: 18.0),
-                    buildProfileInfoRow('Email', 'john.doe@example.com', labelFontSize: 20.0, valueFontSize: 18.0),
-                    buildProfileInfoRow('Phone', '+1 123 456 7890', labelFontSize: 20.0, valueFontSize: 18.0),
-                  ],
-                ),
-              ),
-              SizedBox(height: 70.0),
-              buildHelpAndSupportRow(),
-              SizedBox(height: 40.0),
-              buildAboutUsRow(),
-
-              SizedBox(height: 50.0),
-             ElevatedButton(
-              onPressed: () {
-                _logout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFF9CF93),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              child: Text(
-                'Logout',
-                style: TextStyle(fontSize: 20.0, color: Colors.white),
-              ),
-            ),
-
-            ],
-          ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(16.0),
+                    color: Color.fromARGB(255, 227, 183, 121),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        buildProfileInfoRow('Name', name,
+                            labelFontSize: 20.0, valueFontSize: 18.0),
+                        buildProfileInfoRow('Email', email,
+                            labelFontSize: 20.0, valueFontSize: 18.0),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 70.0),
+                  buildHelpAndSupportRow(),
+                  SizedBox(height: 40.0),
+                  buildAboutUsRow(),
+                  SizedBox(height: 50.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      _logout();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFF9CF93),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    ),
+                  ),
+                ],
+              );
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              // Still waiting for data
+              return Center(child: CircularProgressIndicator());
+            } else {
+              // An error occurred
+              return Center(child: Text('Error fetching data'));
+            }
+          },
         ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -110,6 +144,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // The rest of your class...
+
   Widget buildProfileInfoRow(String label, String value,
       {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
     return Padding(
@@ -120,7 +156,8 @@ class _ProfilePageState extends State<ProfilePage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
+              Text(label,
+                  style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
               SizedBox(height: 8.0),
               ElevatedButton(
                 onPressed: () {},
@@ -192,10 +229,10 @@ class _ProfilePageState extends State<ProfilePage> {
     TextEditingController? controller;
 
     switch (label) {
-      case 'Name':
+      case 'name':
         controller = TextEditingController();
         break;
-      case 'Email':
+      case 'email':
         controller = TextEditingController();
         break;
       case 'Phone':
