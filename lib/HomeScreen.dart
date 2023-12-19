@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const Search()),
+                          MaterialPageRoute(builder: (context) => Search()),
                         );
                       },
                     ),
@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const Sell_lese()),
+                          MaterialPageRoute(builder: (context) => Sell_lese()),
                         );
                       },
                     ),
