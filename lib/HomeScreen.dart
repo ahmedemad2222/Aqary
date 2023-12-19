@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Browse.dart';
-import 'package:flutter_application_1/BuyPage.dart';
-import 'package:flutter_application_1/NavBar.dart' as NavBar; // Use 'as' to provide an alias
+
+import 'package:flutter_application_1/NavBar.dart' as NavBar;
 import 'package:flutter_application_1/SearchPage.dart';
+import 'package:flutter_application_1/Sell_lese.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -11,6 +13,33 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
+  late PageController _pageController;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _timer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
+      if (currentIndex < 3) {
+        currentIndex++;
+      } else {
+        currentIndex = 0;
+      }
+      _pageController.animateToPage(
+        currentIndex,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Sell_lese()),
+                        );
                         // Handle add button tap
                       },
                     ),
@@ -59,63 +92,52 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             Container(
-              height: 155.0,
-              padding: EdgeInsets.all(16.0),
-              child: Wrap(
-                spacing: 16.0,
-                runSpacing: 16.0,
+              height: MediaQuery.of(context).size.height -
+                  kToolbarHeight -
+                  kBottomNavigationBarHeight,
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                },
                 children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => BrowsePage()),
-                      );
-                    },
-                    child: CategoryButton(
-                      category: 'House',
-                      imageAsset: AssetImage('assets/house.png'),
-                      results: '6,342 results',
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/apartment2.jpg'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => BuyPage(apartmentId: '2wHoqLzpcpmiYV7I8oHu')),
-                      );
-                    },
-                    child: CategoryButton(
-                      category: 'Apartments',
-                      imageAsset: AssetImage('assets/Apartments.png'),
-                      results: '14,521 results',
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/apartment.jpg'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      // Handle button tap for 'Chalets'
-                    },
-                    child: CategoryButton(
-                      category: 'Chalets',
-                      imageAsset: AssetImage('assets/Chalets.png'),
-                      results: '10,921 results',
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/apartment3.jpg'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      // Handle button tap for 'Compounds'
-                    },
-                    child: CategoryButton(
-                      category: 'Compounds',
-                      imageAsset: AssetImage('assets/Compounds.png'),
-                      results: '8,361 results',
-                    ),
-                  ),
+                  // Add more containers with images as needed
                 ],
               ),
             ),
             SizedBox(height: 16.0),
-            // Add your main content here
           ],
         ),
       ),
@@ -127,61 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
       ),
-    );
-  }
-}
-
-class CategoryButton extends StatelessWidget {
-  final String category;
-  final ImageProvider imageAsset;
-  final String results;
-
-  CategoryButton({
-    required this.category,
-    required this.imageAsset,
-    required this.results,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 149.0, // Increased width to 149
-          height: 155.0, // Increased height to 155
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15.0),
-            image: DecorationImage(
-              image: imageAsset,
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                bottom: 8.0,
-                left: 8.0,
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 8.0),
-        Text(
-          results,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14.0,
-          ),
-        ),
-      ],
     );
   }
 }
