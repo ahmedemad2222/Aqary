@@ -18,7 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text('Profile'),
         backgroundColor: Color.fromARGB(255, 227, 183, 121),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16.0),
