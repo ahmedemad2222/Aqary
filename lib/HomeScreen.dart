@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-import 'package:flutter_application_1/NavBar.dart' as NavBar;
+import 'package:flutter_application_1/Browse.dart';
+import 'package:flutter_application_1/BuyPage.dart';
+import 'package:flutter_application_1/NavBar.dart' as NavBar; // Use 'as' to provide an alias
+import 'package:flutter_application_1/Search.dart';
 import 'package:flutter_application_1/SearchPage.dart';
 import 'package:flutter_application_1/Sell_lese.dart';
 
@@ -73,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SearchPage()),
+                          MaterialPageRoute(builder: (context) => Search()),
                         );
                       },
                     ),
@@ -84,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(builder: (context) => Sell_lese()),
                         );
-                        // Handle add button tap
                       },
                     ),
                   ],
