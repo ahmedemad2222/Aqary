@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PaymentSuccess.dart';
 
-
 class VisaPaymentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -12,6 +11,7 @@ class VisaPaymentPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
+          // Container with card input fields
           Positioned.fill(
             top: MediaQuery.of(context).size.height / 4.7,
             child: Container(
@@ -40,7 +40,9 @@ class VisaPaymentPage extends StatelessWidget {
                         // Navigate to the PaymentSuccessPage on button press
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
+                          MaterialPageRoute(
+                            builder: (context) => PaymentSuccessPage(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -57,6 +59,16 @@ class VisaPaymentPage extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+          // Image in front of the container
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/Visa.png', // Replace with the actual image path
+              height: MediaQuery.of(context).size.height / 4,
             ),
           ),
         ],
