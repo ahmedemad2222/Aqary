@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
+import 'package:flutter_application_1/ImagePicker.dart';
 import 'package:flutter_application_1/ItemAdded.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Sell_lese extends StatefulWidget {
-  const Sell_lese({super.key});
-
   @override
   _Sell_leseState createState() => _Sell_leseState();
 }
@@ -36,6 +36,32 @@ class _Sell_leseState extends State<Sell_lese> {
       return StepState.editing;
     } else {
       return StepState.indexed;
+    }
+  }
+
+  void _navigateToImagePicker() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ImagePickerScreen(),
+      ),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      XFile? pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile != null) {
+        // Do something with the picked image, e.g., display it.
+        // You can also save the image file to use it later.
+        // For now, let's print the image path.
+        print('Image picked: ${pickedFile.path}');
+      }
+    } catch (e) {
+      print('Error picking image: $e');
     }
   }
 
@@ -99,7 +125,7 @@ class _Sell_leseState extends State<Sell_lese> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ItemAdded(),
+              builder: (context) => ItemAdded(),
             ),
           );
         }
@@ -107,7 +133,7 @@ class _Sell_leseState extends State<Sell_lese> {
     } else {
       // Highlight the step in red by updating the Stepper
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Please fill all required fields in the current step.'),
           backgroundColor: Colors.red,
         ),
@@ -119,15 +145,15 @@ class _Sell_leseState extends State<Sell_lese> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sell Lese'),
-        backgroundColor: const Color.fromARGB(255, 227, 183, 121),
+        title: Text('Sell Lese'),
+        backgroundColor: Color.fromARGB(255, 227, 183, 121),
       ),
       body: Stack(
         children: [
           Positioned.fill(
             child: Container(
               height: MediaQuery.of(context).size.height / 2.5,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/search_img.png'),
                   fit: BoxFit.cover,
@@ -135,7 +161,7 @@ class _Sell_leseState extends State<Sell_lese> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             top: 85,
             left: 48,
             child: Text(
@@ -151,7 +177,7 @@ class _Sell_leseState extends State<Sell_lese> {
           Positioned.fill(
             top: MediaQuery.of(context).size.height / 2.6,
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFFF9CF93),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30),
@@ -173,7 +199,7 @@ class _Sell_leseState extends State<Sell_lese> {
                 steps: [
                   Step(
                     state: getStepState(0),
-                    title: const Text(
+                    title: Text(
                       'Step 1',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -181,11 +207,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'List property for:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -197,9 +223,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Sell'),
-                              const SizedBox(width: 20),
+                              SizedBox(width: 5),
+                              Text('Sell'),
+                              SizedBox(width: 20),
                               Radio(
                                 value: 'Rent',
                                 groupValue: type,
@@ -209,31 +235,35 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Rent'),
+                              SizedBox(width: 5),
+                              Text('Rent'),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Add posting title:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 5),
+                          SizedBox(height: 5),
                           RoundedTextField(titleController),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Describe the property:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 5),
+                          SizedBox(height: 5),
                           RoundedTextField(descriptionController),
+                          ElevatedButton(
+                            onPressed: _navigateToImagePicker,
+                            child: Text('Pick Image'),
+                          ),
                         ],
                       ),
                     ),
                   ),
                   Step(
                     state: getStepState(1),
-                    title: const Text(
+                    title: Text(
                       'Step 2',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -241,11 +271,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Rooms:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -261,17 +291,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    const SizedBox(width: 10),
+                                    SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Bathrooms:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -288,17 +318,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    const SizedBox(width: 10),
+                                    SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Kitchens:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -314,17 +344,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    const SizedBox(width: 10),
+                                    SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Parking:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -336,9 +366,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Yes'),
-                              const SizedBox(width: 20),
+                              SizedBox(width: 5),
+                              Text('Yes'),
+                              SizedBox(width: 20),
                               Radio(
                                 value: 'No',
                                 groupValue: Has_a_Parking,
@@ -348,16 +378,16 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('No'),
+                              SizedBox(width: 5),
+                              Text('No'),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Pool:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -369,9 +399,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Yes'),
-                              const SizedBox(width: 20),
+                              SizedBox(width: 5),
+                              Text('Yes'),
+                              SizedBox(width: 20),
                               Radio(
                                 value: 'No',
                                 groupValue: Has_a_Pool,
@@ -381,8 +411,8 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('No'),
+                              SizedBox(width: 5),
+                              Text('No'),
                             ],
                           ),
                         ],
@@ -391,7 +421,7 @@ class _Sell_leseState extends State<Sell_lese> {
                   ),
                   Step(
                     state: getStepState(2),
-                    title: const Text(
+                    title: Text(
                       'Step 3',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -399,11 +429,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Type:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -415,9 +445,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Apartment'),
-                              const SizedBox(width: 20),
+                              SizedBox(width: 5),
+                              Text('Apartment'),
+                              SizedBox(width: 20),
                               Radio(
                                 value: 'Villa',
                                 groupValue: Building_Type,
@@ -427,9 +457,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Villa'),
-                              const SizedBox(width: 20),
+                              SizedBox(width: 5),
+                              Text('Villa'),
+                              SizedBox(width: 20),
                               Radio(
                                 value: 'Compound',
                                 groupValue: Building_Type,
@@ -439,23 +469,23 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 5),
-                              const Text('Compound'),
+                              SizedBox(width: 5),
+                              Text('Compound'),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Location:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 5),
+                          SizedBox(height: 5),
                           RoundedTextField(locationController),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             'Price:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 5),
+                          SizedBox(height: 5),
                           RoundedTextField(priceController),
                         ],
                       ),
@@ -467,14 +497,14 @@ class _Sell_leseState extends State<Sell_lese> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-      ),
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+        ),
     );
   }
 }
@@ -482,19 +512,19 @@ class _Sell_leseState extends State<Sell_lese> {
 class RoundedTextField extends StatelessWidget {
   final TextEditingController controller;
 
-  const RoundedTextField(this.controller, {super.key});
+  RoundedTextField(this.controller);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5),
+      margin: EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        color: const Color(0xFFFEF4E7),
+        color: Color(0xFFFEF4E7),
       ),
       child: TextFormField(
         controller: controller,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           hintText: 'Enter text',
           contentPadding: EdgeInsets.all(10.0),
           border: InputBorder.none,
@@ -521,7 +551,7 @@ class PublishAd {
   ) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference buildings = firestore.collection('Buildings');
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     await buildings.add({
       'SellerId': UserID,
