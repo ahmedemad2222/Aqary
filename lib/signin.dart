@@ -1,17 +1,43 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_application_1/PreHomeScreen.dart';
 
 class SignInPage extends StatelessWidget {
   SignInPage({Key? key});
 
-  // Declare controllers for email and password
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 2),
+    ));
+  }
+
+  void _createAccount(BuildContext context) {
+    _firebaseAuth
+        .createUserWithEmailAndPassword(
+            email: _emailController.text, password: _passwordController.text)
+        .then((UserCredential authResult) {
+      _firestore.collection('users').doc(authResult.user!.uid).set({
+        'name': _nameController.text,
+        'email': _emailController.text,
+        'uid': authResult.user!.uid,
+        // Add other fields as needed
+      });
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => PreHomeScreen()));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,6 +116,7 @@ class SignInPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20.0),
                     TextFormField(
+                      controller: _confirmPasswordController,
                       decoration: const InputDecoration(
                         labelText: 'Confirm Password',
                         labelStyle: TextStyle(color: Colors.black),
@@ -115,28 +142,9 @@ class SignInPage extends StatelessWidget {
                   margin: EdgeInsets.only(bottom: 20.0),
                   child: IconButton(
                     onPressed: () {
-                      print('Email: ${_emailController.text}');
-                      print('Password: ${_passwordController.text}');
-                      _firebaseAuth
-                          .createUserWithEmailAndPassword(
-                              email: _emailController.text,
-                              password: _passwordController.text)
-                          .then((UserCredential authResult) {
-                        _firestore
-                            .collection('users')
-                            .doc(authResult.user!.uid)
-                            .set({
-                          'name': _nameController.text,
-                          'email': _emailController.text,
-                          'uid': authResult.user!.uid,
-                          // Add other fields as needed
-                        });
-                        //here
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PreHomeScreen()));
-                      });
+                      if (_validateForm(context)) {
+                        _createAccount(context);
+                      }
                     },
                     icon: Icon(
                       Icons.arrow_forward,
@@ -160,5 +168,24 @@ class SignInPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool _validateForm(BuildContext context) {
+    if (_passwordController.text.length < 6) {
+      _showSnackBar(context, 'Password must be at least 6 characters');
+      return false;
+    }
+
+    if (_confirmPasswordController.text != _passwordController.text) {
+      _showSnackBar(context, 'Passwords do not match');
+      return false;
+    }
+
+    if (!_emailController.text.endsWith('@gmail.com')) {
+      _showSnackBar(context, 'Invalid email format (must end with @gmail.com)');
+      return false;
+    }
+
+    return true;
   }
 }
