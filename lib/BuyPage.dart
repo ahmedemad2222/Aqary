@@ -71,6 +71,9 @@ class _BuyPage extends State<BuyPage> {
             }
 
             Map<String, dynamic> apartmentData = snapshot.data!;
+            
+            // Retrieve the 'Type' property
+            String apartmentType = apartmentData['Type'] ?? '';
 
             return Stack(
               children: [
@@ -247,46 +250,48 @@ class _BuyPage extends State<BuyPage> {
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.payment,
-                                      size: 30,
-                                      color: Color(0xFF404040),
-                                    ),
-                                    const SizedBox(width: 25),
-                                    Container(
-                                      width: 360 - 16 * 2 - 8 * 2,
-                                      height: 45,
-                                      decoration: ShapeDecoration(
-                                        color: const Color(0xFFD6CBBB),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18),
-                                        ),
+                                // Check if the type is 'rent' before displaying the Choose Payment button
+                                if (apartmentType.toLowerCase() == 'rent')
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.payment,
+                                        size: 30,
+                                        color: Color(0xFF404040),
                                       ),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => ChoosePaymentPage(),
-                                            ),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFFD6CBBB),
+                                      const SizedBox(width: 25),
+                                      Container(
+                                        width: 360 - 16 * 2 - 8 * 2,
+                                        height: 45,
+                                        decoration: ShapeDecoration(
+                                          color: const Color(0xFFD6CBBB),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(18),
                                           ),
                                         ),
-                                        child: const Text(
-                                          'Choose Payment',
-                                          style: TextStyle(fontSize: 16),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ChoosePaymentPage(),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFFD6CBBB),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(18),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Choose Payment',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
                               ],
                             ),
                           ],
