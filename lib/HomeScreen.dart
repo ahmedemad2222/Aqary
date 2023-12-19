@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/NavBar.dart' as NavBar; // Use 'as' to provide an alias
+import 'package:flutter_application_1/Browse.dart';
+import 'package:flutter_application_1/NavBar.dart' as NavBar;
 import 'package:flutter_application_1/Search.dart';
 import 'package:flutter_application_1/Sell_lese.dart';
 
@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    _timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
       if (picindex < 3) {
         picindex++;
       } else {
@@ -49,98 +49,106 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Aqary'),
         backgroundColor: const Color.fromARGB(255, 227, 183, 121),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Search()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Sell_lese()),
+              );
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          // Images
+          SizedBox(
+            height: MediaQuery.of(context).size.height -
+                kToolbarHeight -
+                kBottomNavigationBarHeight,
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  picindex = index;
+                });
+              },
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: const Text(
-                    'What are you looking for?',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF000000),
-                      letterSpacing: 0.84,
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/apartment2.jpg'),
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Search()),
-                        );
-                      },
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/apartment.jpg'),
+                      fit: BoxFit.cover,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Sell_lese()),
-                        );
-                      },
-                    ),
-                  ],
+                  ),
                 ),
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/apartment3.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                // Add more containers with images as needed
               ],
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height -
-                  kToolbarHeight -
-                  kBottomNavigationBarHeight,
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    picindex = index;
-                  });
-                },
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/apartment2.jpg'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+          ),
+
+          // Rounded "Browse" button
+          Positioned(
+            bottom: 16.0,
+            left: MediaQuery.of(context).size.width / 2 - 55.0, // Adjust the position as needed
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BrowsePage()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 227, 183, 121),
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: Text(
+                  'Browse',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/apartment.jpg'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/apartment3.jpg'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  // Add more containers with images as needed
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: 16.0),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: NavBar.CustomBottomNavigationBar(
         currentIndex: currentIndex,
