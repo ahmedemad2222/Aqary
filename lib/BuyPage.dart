@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ChatPage1.dart';
+import 'package:flutter_application_1/ChoosePaymentPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 class BuyPage extends StatefulWidget {
   final String apartmentId;
 
-  const BuyPage({super.key, required this.apartmentId});
+  const BuyPage({Key? key, required this.apartmentId}) : super(key: key);
 
   @override
   _BuyPage createState() => _BuyPage();
@@ -22,7 +23,6 @@ class _BuyPage extends State<BuyPage> {
   @override
   void initState() {
     super.initState();
-    // Call the function to fetch apartment data when the widget is first initialized
     apartmentData = fetchApartmentData();
   }
 
@@ -31,7 +31,6 @@ class _BuyPage extends State<BuyPage> {
     DocumentSnapshot documentSnapshot =
         await firestore.collection('Buildings').doc(widget.apartmentId).get();
 
-    // Store the apartment data
     return documentSnapshot.data() as Map<String, dynamic>;
   }
 
@@ -72,10 +71,12 @@ class _BuyPage extends State<BuyPage> {
             }
 
             Map<String, dynamic> apartmentData = snapshot.data!;
+            
+            // Retrieve the 'Type' property
+            String apartmentType = apartmentData['Type'] ?? '';
 
             return Stack(
               children: [
-                // Image above details container
                 Positioned(
                   top: 0,
                   left: 0,
@@ -108,8 +109,7 @@ class _BuyPage extends State<BuyPage> {
                           bottomLeft: Radius.zero,
                           bottomRight: Radius.zero,
                         ),
-                        color: Color(
-                            0xFFF9CF93), // Background color for details container
+                        color: Color(0xFFF9CF93),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -153,7 +153,6 @@ class _BuyPage extends State<BuyPage> {
                                         ),
                                         GestureDetector(
                                           onTap: () {
-                                            // Handle the click on the location here
                                             String location =
                                                 apartmentData['Location'] ??
                                                     'Unknown';
@@ -163,8 +162,7 @@ class _BuyPage extends State<BuyPage> {
                                             'Location: ${apartmentData['Location'] ?? 'Unknown'}',
                                             style: const TextStyle(
                                               fontSize: 16,
-                                              color:
-                                                  Color.fromARGB(255, 0, 0, 0),
+                                              color: Color.fromARGB(255, 0, 0, 0),
                                             ),
                                           ),
                                         ),
@@ -192,8 +190,7 @@ class _BuyPage extends State<BuyPage> {
                                 ),
                                 DetailContainerWithIcon(
                                   icon: Icons.bathtub,
-                                  text:
-                                      '${apartmentData['Bathrooms']} Bathroom',
+                                  text: '${apartmentData['Bathrooms']} Bathroom',
                                 ),
                                 DetailContainerWithIcon(
                                   icon: Icons.pool,
@@ -206,49 +203,95 @@ class _BuyPage extends State<BuyPage> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(
-                                  Icons.chat,
-                                  size: 30,
-                                  color: Color(0xFF404040),
-                                ),
-                                Container(
-                                  width: 360 - 16 * 2 - 8 * 2,
-                                  height: 45,
-                                  decoration: ShapeDecoration(
-                                    color: const Color(0xFFD6CBBB),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.chat,
+                                      size: 30,
+                                      color: Color(0xFF404040),
                                     ),
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatPage1(
-                                            reciverUserEmail:
-                                                apartmentData['SellerId'],
-                                            reciverUserid:
-                                                apartmentData['SellerId'],
+                                    const SizedBox(width: 25),
+                                    Container(
+                                      width: 360 - 16 * 2 - 8 * 2,
+                                      height: 45,
+                                      decoration: ShapeDecoration(
+                                        color: const Color(0xFFD6CBBB),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(18),
+                                        ),
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChatPage1(
+                                                reciverUserEmail: apartmentData['SellerId'],
+                                                reciverUserid: apartmentData['SellerId'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFFD6CBBB),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(18),
                                           ),
                                         ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFD6CBBB),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
+                                        child: const Text(
+                                          'Contact Seller',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Contact Seller',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
+                                  ],
                                 ),
+                                const SizedBox(height: 8),
+                                // Check if the type is 'rent' before displaying the Choose Payment button
+                                if (apartmentType.toLowerCase() == 'rent')
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.payment,
+                                        size: 30,
+                                        color: Color(0xFF404040),
+                                      ),
+                                      const SizedBox(width: 25),
+                                      Container(
+                                        width: 360 - 16 * 2 - 8 * 2,
+                                        height: 45,
+                                        decoration: ShapeDecoration(
+                                          color: const Color(0xFFD6CBBB),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(18),
+                                          ),
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ChoosePaymentPage(),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFFD6CBBB),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(18),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Choose Payment',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                               ],
                             ),
                           ],
@@ -301,7 +344,7 @@ class DetailContainerWithIcon extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: Color(0xFF404040),
+            color: const Color(0xFF404040),
           ),
           const SizedBox(height: 4),
           Text(
