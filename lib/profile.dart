@@ -10,7 +10,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int currentIndex = 0;
+  int currentIndex = 2;
   late String email = '';
   late String name = '';
 
@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text('Profile'),
         backgroundColor: Color.fromARGB(255, 227, 183, 121),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
         child: FutureBuilder(
           future: fetchData(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/ChatPage1.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 class BuyPage extends StatefulWidget {
   final String apartmentId;
 
-  BuyPage({required this.apartmentId});
+  const BuyPage({super.key, required this.apartmentId});
 
   @override
   _BuyPage createState() => _BuyPage();
@@ -34,8 +35,9 @@ class _BuyPage extends State<BuyPage> {
     return documentSnapshot.data() as Map<String, dynamic>;
   }
 
-  Future<void> _openGoogleMaps(double latitude, double longitude) async {
-    final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+  Future<void> _openGoogleMaps(String location) async {
+    final String googleMapsUrl =
+        'https://www.google.com/maps/search/?api=1&query=$location';
 
     if (await canLaunch(googleMapsUrl)) {
       await launch(googleMapsUrl);
@@ -49,10 +51,10 @@ class _BuyPage extends State<BuyPage> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Apartment Details'),
-          backgroundColor: Color.fromARGB(255, 227, 183, 121),
+          title: const Text('Apartment Details'),
+          backgroundColor: const Color.fromARGB(255, 227, 183, 121),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -62,11 +64,11 @@ class _BuyPage extends State<BuyPage> {
           future: apartmentData,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data == null) {
-              return Center(child: Text('No data found'));
+              return const Center(child: Text('No data found'));
             }
 
             Map<String, dynamic> apartmentData = snapshot.data!;
@@ -80,9 +82,9 @@ class _BuyPage extends State<BuyPage> {
                   right: 0,
                   child: ClipRRect(
                     child: Container(
-                      height: 200,
+                      height: 300,
                       width: double.infinity,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage('assets/buypage.jpg'),
                           fit: BoxFit.cover,
@@ -92,14 +94,14 @@ class _BuyPage extends State<BuyPage> {
                   ),
                 ),
                 Positioned.fill(
-                  top: 185,
+                  top: 285,
                   bottom: 0,
                   child: Padding(
-                    padding: EdgeInsets.all(1.0),
+                    padding: const EdgeInsets.all(1.0),
                     child: Container(
                       height: 145,
                       width: double.infinity,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(23),
                           topRight: Radius.circular(23),
@@ -110,7 +112,7 @@ class _BuyPage extends State<BuyPage> {
                             0xFFF9CF93), // Background color for details container
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -124,16 +126,16 @@ class _BuyPage extends State<BuyPage> {
                                       children: [
                                         Text(
                                           apartmentData['Name'],
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF404040),
                                           ),
                                         ),
-                                        SizedBox(width: 130),
+                                        const SizedBox(width: 170),
                                         Text(
-                                          'Price: ${apartmentData['Price'] ?? 'N/A'} LE',
-                                          style: TextStyle(
+                                          'Price: ${apartmentData['Price'] ?? 'N/A'} \$',
+                                          style: const TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF404040),
@@ -141,10 +143,10 @@ class _BuyPage extends State<BuyPage> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 20),
+                                    const SizedBox(height: 20),
                                     Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.location_on,
                                           size: 16,
                                           color: Color(0xFF404040),
@@ -152,15 +154,17 @@ class _BuyPage extends State<BuyPage> {
                                         GestureDetector(
                                           onTap: () {
                                             // Handle the click on the location here
-                                            double latitude = 40.689247; // Replace with the actual latitude key
-                                            double longitude = -74.044502; // Replace with the actual longitude key
-                                            _openGoogleMaps(latitude, longitude);
+                                            String location =
+                                                apartmentData['Location'] ??
+                                                    'Unknown';
+                                            _openGoogleMaps(location);
                                           },
                                           child: Text(
                                             'Location: ${apartmentData['Location'] ?? 'Unknown'}',
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 16,
-                                              color: const Color.fromARGB(255, 0, 0, 0),
+                                              color:
+                                                  Color.fromARGB(255, 0, 0, 0),
                                             ),
                                           ),
                                         ),
@@ -170,29 +174,42 @@ class _BuyPage extends State<BuyPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
                               'Description: ${apartmentData['Description']}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 color: Color(0xFF404040),
                               ),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                DetailContainer('${apartmentData['rooms']} Rooms'),
-                                DetailContainer('${apartmentData['Bathrooms']} Bathrooms'),
-                                DetailContainer('${apartmentData['Parking']} Parking'),
-                                DetailContainer('${apartmentData['Kitchens']} Kitchen'),
+                                DetailContainerWithIcon(
+                                  icon: Icons.room,
+                                  text: '${apartmentData['rooms']} Rooms',
+                                ),
+                                DetailContainerWithIcon(
+                                  icon: Icons.bathtub,
+                                  text:
+                                      '${apartmentData['Bathrooms']} Bathroom',
+                                ),
+                                DetailContainerWithIcon(
+                                  icon: Icons.pool,
+                                  text: 'Pool ${apartmentData['Pool']}',
+                                ),
+                                DetailContainerWithIcon(
+                                  icon: Icons.kitchen,
+                                  text: '${apartmentData['Kitchens']} Kitchen',
+                                ),
                               ],
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.chat,
                                   size: 30,
                                   color: Color(0xFF404040),
@@ -201,22 +218,32 @@ class _BuyPage extends State<BuyPage> {
                                   width: 360 - 16 * 2 - 8 * 2,
                                   height: 45,
                                   decoration: ShapeDecoration(
-                                    color: Color(0xFFD6CBBB),
+                                    color: const Color(0xFFD6CBBB),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                   ),
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // Navigate to Chat Page or open Chat Functionality
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatPage1(
+                                            reciverUserEmail:
+                                                apartmentData['SellerId'],
+                                            reciverUserid:
+                                                apartmentData['SellerId'],
+                                          ),
+                                        ),
+                                      );
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      primary: Color(0xFFD6CBBB),
+                                      backgroundColor: const Color(0xFFD6CBBB),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(18),
                                       ),
                                     ),
-                                    child: Text(
+                                    child: const Text(
                                       'Contact Seller',
                                       style: TextStyle(fontSize: 16),
                                     ),
@@ -247,10 +274,15 @@ class _BuyPage extends State<BuyPage> {
   }
 }
 
-class DetailContainer extends StatelessWidget {
-  final String detail;
+class DetailContainerWithIcon extends StatelessWidget {
+  final IconData icon;
+  final String text;
 
-  DetailContainer(this.detail);
+  const DetailContainerWithIcon({
+    required this.icon,
+    required this.text,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -258,19 +290,28 @@ class DetailContainer extends StatelessWidget {
       width: 71,
       height: 93,
       decoration: ShapeDecoration(
-        color: Color(0xFFD6CBBB),
+        color: const Color(0xFFD6CBBB),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
       ),
-      child: Center(
-        child: Text(
-          detail,
-          style: TextStyle(
-            fontSize: 12,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 20,
             color: Color(0xFF404040),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF404040),
+            ),
+          ),
+        ],
       ),
     );
   }

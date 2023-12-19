@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ChatScreen.dart';
+import 'package:flutter_application_1/ChatsScreen.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
+import 'package:flutter_application_1/ImagePicker.dart';
 import 'package:flutter_application_1/profile.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
@@ -32,7 +35,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           case 1:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => ChatScreen()),
+              MaterialPageRoute(builder: (context) => ChatsScreen()),
             );
             break;
           case 2:
