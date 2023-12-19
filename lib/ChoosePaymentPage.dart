@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
+import 'package:flutter_application_1/NavBar.dart';
 import 'package:flutter_application_1/Sell_lese.dart';
 import 'package:flutter_application_1/Visa.dart';
 
