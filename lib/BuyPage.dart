@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/ChatPage1.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -224,7 +225,17 @@ class _BuyPage extends State<BuyPage> {
                                   ),
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // Navigate to Chat Page or open Chat Functionality
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatPage1(
+                                            reciverUserEmail:
+                                                apartmentData['SellerId'],
+                                            reciverUserid:
+                                                apartmentData['SellerId'],
+                                          ),
+                                        ),
+                                      );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFFD6CBBB),
@@ -305,4 +316,3 @@ class DetailContainerWithIcon extends StatelessWidget {
     );
   }
 }
-

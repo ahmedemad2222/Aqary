@@ -26,10 +26,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
       ),
       body: Column(
         children: [
-          // Add SizedBox to create space between AppBar and profile pictures
           SizedBox(height: 60),
-
-          // Profile pictures row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -37,18 +34,15 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 stream: _firestore.collection('users').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Return a loading indicator while waiting for data.
                     return CircularProgressIndicator();
                   }
 
                   if (snapshot.hasError) {
-                    // Handle error case.
                     print('Error: ${snapshot.error}');
                     return Text('Error');
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    // Handle case where there is no data.
                     return Text('No users found');
                   }
 
@@ -63,11 +57,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
               ),
             ],
           ),
-
-          // Add SizedBox to create space between profile pictures and chats
           SizedBox(height: 10),
-
-          // Colored container with chat items
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -81,18 +71,15 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 stream: _firestore.collection('users').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Return a loading indicator while waiting for data.
                     return CircularProgressIndicator();
                   }
 
                   if (snapshot.hasError) {
-                    // Handle error case.
                     print('Error: ${snapshot.error}');
                     return Text('Error');
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    // Handle case where there is no data.
                     return Text('No users found');
                   }
 
@@ -100,6 +87,12 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
                       final doc = snapshot.data!.docs[index];
+
+                      // Skip the logged-in user
+                      if (doc['uid'] == _firebaseAuth.currentUser!.uid) {
+                        return SizedBox.shrink();
+                      }
+
                       return _buildUserListItem(doc);
                     },
                   );
@@ -110,7 +103,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 1, // Set the index for 'Chat'
+        currentIndex: 1,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -138,8 +131,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
   Widget _buildUserProfilePicture(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-    // Get the profile picture URL or provide a default URL if it's null
     String profilePictureUrl =
         data['profilePictureUrl'] ?? 'https://example.com/default-profile.png';
 
@@ -147,15 +138,13 @@ class _ChatsScreenState extends State<ChatsScreen> {
       padding: const EdgeInsets.all(8.0),
       child: CircleAvatar(
         backgroundImage: NetworkImage(profilePictureUrl),
-        radius: 20.0, // Set the radius according to your preference
+        radius: 20.0,
       ),
     );
   }
 
   Widget _buildUserListItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-    // Get the profile picture URL or provide a default URL if it's null
     String profilePictureUrl =
         data['profilePictureUrl'] ?? 'https://example.com/default-profile.png';
 
@@ -169,12 +158,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
           .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Return a loading indicator while waiting for data.
           return CircularProgressIndicator();
         }
 
         if (snapshot.hasError) {
-          // Handle error case.
           print('Error: ${snapshot.error}');
           return Text('Error');
         }
@@ -182,7 +169,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
         String lastMessage = 'No messages yet';
 
         if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-          // Assuming your message document has a 'message' field
           lastMessage = snapshot.data!.docs[0]['message'];
         }
 
@@ -214,4 +200,3 @@ class _ChatsScreenState extends State<ChatsScreen> {
     return ids.join("_");
   }
 }
-

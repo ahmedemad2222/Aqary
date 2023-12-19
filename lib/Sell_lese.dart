@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
 import 'package:flutter_application_1/ItemAdded.dart';
@@ -35,71 +36,80 @@ class _Sell_leseState extends State<Sell_lese> {
   }
 
   void handleContinueButtonPressed() {
-  bool isValid = false;
+    bool isValid = false;
 
-  // Check if the required fields for the current step are filled
-  switch (currentStep) {
-    case 0:
-      isValid = titleController.text.isNotEmpty &&
-          descriptionController.text.isNotEmpty;
-      break;
-    case 1:
-      isValid = Number_of_rooms.isNotEmpty &&
-          Number_of_Bathrooms.isNotEmpty &&
-          Number_of_Kitchens.isNotEmpty &&
-          Has_a_Parking.isNotEmpty &&
-          Has_a_Pool.isNotEmpty;
-      break;
-    case 2:
-      isValid = Building_Type.isNotEmpty &&
-          locationController.text.isNotEmpty &&
-          priceController.text.isNotEmpty;
-      break;
-    default:
-      isValid = false;
+    // Check if the required fields for the current step are filled
+    switch (currentStep) {
+      case 0:
+        isValid = titleController.text.isNotEmpty &&
+            descriptionController.text.isNotEmpty;
+        break;
+      case 1:
+        isValid = Number_of_rooms.isNotEmpty &&
+            Number_of_Bathrooms.isNotEmpty &&
+            Number_of_Kitchens.isNotEmpty &&
+            Has_a_Parking.isNotEmpty &&
+            Has_a_Pool.isNotEmpty;
+        break;
+      case 2:
+        isValid = Building_Type.isNotEmpty &&
+            locationController.text.isNotEmpty &&
+            priceController.text.isNotEmpty;
+        break;
+      default:
+        isValid = false;
+    }
+    User? user = FirebaseAuth.instance.currentUser;
+    String? userID;
+
+    if (user != null && user.uid.isNotEmpty) {
+      userID = user.uid;
+    } else {
+      // Handle the case where the user is not logged in
+      print('User not logged in.');
+      return;
+    }
+
+    if (isValid) {
+      setState(() {
+        if (currentStep < 2) {
+          currentStep += 1;
+        } else {
+          // Your existing logic for handling the final step
+          PublishAd().publishAd(
+            userID!,
+            type,
+            titleController.text,
+            descriptionController.text,
+            int.parse(Number_of_rooms),
+            int.parse(Number_of_Bathrooms),
+            int.parse(Number_of_Kitchens),
+            Has_a_Parking == 'Yes',
+            Has_a_Pool == 'Yes',
+            Building_Type,
+            locationController.text,
+            int.parse(priceController.text),
+          );
+
+          // After publishing the ad, navigate to another page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ItemAdded(),
+            ),
+          );
+        }
+      });
+    } else {
+      // Highlight the step in red by updating the Stepper
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill all required fields in the current step.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-
-  if (isValid) {
-    setState(() {
-      if (currentStep < 2) {
-        currentStep += 1;
-      } else {
-        // Your existing logic for handling the final step
-        PublishAd().publishAd(
-          'userID',
-          type,
-          titleController.text,
-          descriptionController.text,
-          int.parse(Number_of_rooms),
-          int.parse(Number_of_Bathrooms),
-          int.parse(Number_of_Kitchens),
-          Has_a_Parking == 'Yes',
-          Has_a_Pool == 'Yes',
-          Building_Type,
-          locationController.text,
-          int.parse(priceController.text),
-        );
-
-        // After publishing the ad, navigate to another page
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ItemAdded(),
-          ),
-        );
-      }
-    });
-  } else {
-    // Highlight the step in red by updating the Stepper
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Please fill all required fields in the current step.'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +278,8 @@ class _Sell_leseState extends State<Sell_lese> {
                                       groupValue: Number_of_Bathrooms,
                                       onChanged: (value) {
                                         setState(() {
-                                          Number_of_Bathrooms = value.toString();
+                                          Number_of_Bathrooms =
+                                              value.toString();
                                         });
                                       },
                                     ),
@@ -517,9 +528,10 @@ class PublishAd {
     String propertyType,
     String location,
     int price,
-  )   async {
+  ) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference buildings = firestore.collection('Buildings');
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     await buildings.add({
       'SellerId': UserID,
@@ -539,7 +551,6 @@ class PublishAd {
     print('Ad published to Firestore!');
   }
 }
-
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
