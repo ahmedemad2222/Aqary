@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/BuyPage.dart';
-import 'package:flutter_application_1/HomeScreen.dart';
 import 'package:flutter_application_1/NavBar.dart' as NavBar;
-import 'package:flutter_application_1/SearchPage.dart';
-
 class ApartmentWidget extends StatelessWidget {
   final String name;
   final String price;
@@ -68,7 +65,7 @@ class _BrowsePageState extends State<BrowsePage> {
   // List to store fetched data from Firebase
   List<Map<String, dynamic>> apartments = [];
 
-  String _selectedLocation = ''; // Store the selected location
+  List<String> _selectedLocations = []; // Store the selected locations
 
   @override
   void initState() {
@@ -91,16 +88,14 @@ class _BrowsePageState extends State<BrowsePage> {
     querySnapshot.docs.forEach((document) {
       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-
       // Add the document ID to the data
       data['documentId'] = document.id;
 
-      // Check if the type matches the selected category ("Rent" or "Buy") and the location matches
+      // Check if the type matches the selected category and the location matches
       if ((_rentBuyIndex == 0 && data['Type'] == 'Rent' ||
               _rentBuyIndex == 1 && data['Type'] == 'Sell') &&
-          (_selectedLocation.isEmpty ||
-              data['Location'] == _selectedLocation)) {
-
+          (_selectedLocations.isEmpty ||
+              _selectedLocations.contains(data['Location']))) {
         apartments.add(data);
       }
     });
@@ -148,7 +143,6 @@ class _BrowsePageState extends State<BrowsePage> {
                 int bedrooms = (apartments[index]['rooms']);
 
                 // Get the building ID from the document ID
-
                 return GestureDetector(
                   onTap: () {
                     String buildingId = apartments[index]['documentId'];
@@ -199,7 +193,11 @@ class _BrowsePageState extends State<BrowsePage> {
                     });
                   },
                   child: Text(
-                    _isLocationExpanded ? 'Egypt' : 'Egypt',
+                    _isLocationExpanded
+                        ? _selectedLocations.isEmpty
+                            ? 'Select Locations'
+                            : _selectedLocations.join(', ')
+                        : 'Select Locations',
                     style: TextStyle(fontSize: 14, color: Colors.blue),
                   ),
                 ),
@@ -214,13 +212,11 @@ class _BrowsePageState extends State<BrowsePage> {
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
-
                       _buildRecentLocation('Maadi'),
                       _buildRecentLocation('Obour'),
                       _buildRecentLocation('Aswan'),
                       _buildRecentLocation('Alex'),
                       _buildRecentLocation('Tagamoa'),
-
                       _buildRecentLocation('Madint Nast'),
                       _buildRecentLocation('Masr Algededa'),
                     ],
@@ -249,18 +245,22 @@ class _BrowsePageState extends State<BrowsePage> {
           // Handle recent location click
           print('Recent Location: $location clicked');
           setState(() {
-            _selectedLocation = location;
+            if (_selectedLocations.contains(location)) {
+              _selectedLocations.remove(location); // Unselect the location
+            } else {
+              _selectedLocations.add(location);
+            }
             fetchData(); // Call fetchData when the location changes
           });
         },
         child: Text(
           location,
-
           style: TextStyle(
-              fontSize: 14,
-              color:
-                  _selectedLocation == location ? Colors.blue : Colors.black),
-
+            fontSize: 14,
+            color: _selectedLocations.contains(location)
+                ? Colors.blue
+                : Colors.black,
+          ),
         ),
       ),
     );
@@ -287,8 +287,7 @@ class _BrowsePageState extends State<BrowsePage> {
         ),
         child: Text(
           category,
-          style:
-              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
+          style: TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
         ),
       ),
     );
