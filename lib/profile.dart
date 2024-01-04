@@ -1,8 +1,11 @@
+//import 'dart:js';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/OfferedApartments.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -82,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         CircleAvatar(
                           radius: 30,
                           backgroundImage:
-                              AssetImage('assets/profile_picture.jpg'),
+                              AssetImage('profile_picture.jpg'),
                         ),
                         SizedBox(width: 16.0),
                       ],
@@ -101,11 +104,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 70.0),
+                  SizedBox(height: 40.0),
                   buildHelpAndSupportRow(),
                   SizedBox(height: 40.0),
                   buildAboutUsRow(),
-                  SizedBox(height: 50.0),
+                  SizedBox(height: 40.0),
+                  buildOfferedApartments(),
+                  SizedBox(height: 40.0),
                   ElevatedButton(
                     onPressed: () {
                       _logout();
@@ -144,8 +149,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // The rest of your class...
-
   Widget buildProfileInfoRow(String label, String value,
       {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
     return Padding(
@@ -157,7 +160,8 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
+                  style:
+                      TextStyle(fontSize: labelFontSize, color: Colors.white)),
               SizedBox(height: 8.0),
               ElevatedButton(
                 onPressed: () {},
@@ -169,7 +173,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: Text(
                   value,
-                  style: TextStyle(fontSize: valueFontSize, color: Colors.black),
+                  style:
+                      TextStyle(fontSize: valueFontSize, color: Colors.black),
                 ),
               ),
             ],
@@ -192,7 +197,8 @@ class _ProfilePageState extends State<ProfilePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.help, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.help,
+                size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'Help & Support',
@@ -200,7 +206,8 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
@@ -212,7 +219,8 @@ class _ProfilePageState extends State<ProfilePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.info, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.info,
+                size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'About Us',
@@ -220,8 +228,37 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
       ],
+    );
+  }
+
+  Widget buildOfferedApartments() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => OfferedApartments()));
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(Icons.home,
+                  size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+              SizedBox(width: 16.0),
+              Text(
+                'My Offered Apartments',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Icon(Icons.arrow_forward_ios,
+              size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        ],
+      ),
     );
   }
 
@@ -256,7 +293,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           actions: [
             TextButton(
               onPressed: () {
