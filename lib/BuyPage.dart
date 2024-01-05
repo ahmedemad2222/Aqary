@@ -34,6 +34,31 @@ class _BuyPage extends State<BuyPage> {
     return documentSnapshot.data() as Map<String, dynamic>;
   }
 
+  Future<String?> fetchSellerEmail(String sellerId) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Fetch user data where uid matches the SellerId
+      QuerySnapshot userQuery = await firestore
+          .collection('users')
+          .where('uid', isEqualTo: sellerId)
+          .get();
+
+      if (userQuery.docs.isNotEmpty) {
+        // Assuming uid is unique, so there should be only one document
+        DocumentSnapshot userSnapshot = userQuery.docs.first;
+        print('Seller email found: ${userSnapshot['email']}');
+        return userSnapshot['email'];
+      } else {
+        print('Seller not found in the user table.');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching seller email: $e');
+      return null;
+    }
+  }
+
   Future<void> _openGoogleMaps(String location) async {
     final String googleMapsUrl =
         'https://www.google.com/maps/search/?api=1&query=$location';
@@ -71,8 +96,7 @@ class _BuyPage extends State<BuyPage> {
             }
 
             Map<String, dynamic> apartmentData = snapshot.data!;
-            
-            // Retrieve the 'Type' property
+
             String apartmentType = apartmentData['Type'] ?? '';
 
             return Stack(
@@ -162,7 +186,8 @@ class _BuyPage extends State<BuyPage> {
                                             'Location: ${apartmentData['Location'] ?? 'Unknown'}',
                                             style: const TextStyle(
                                               fontSize: 16,
-                                              color: Color.fromARGB(255, 0, 0, 0),
+                                              color:
+                                                  Color.fromARGB(255, 0, 0, 0),
                                             ),
                                           ),
                                         ),
@@ -190,7 +215,8 @@ class _BuyPage extends State<BuyPage> {
                                 ),
                                 DetailContainerWithIcon(
                                   icon: Icons.bathtub,
-                                  text: '${apartmentData['Bathrooms']} Bathroom',
+                                  text:
+                                      '${apartmentData['Bathrooms']} Bathroom',
                                 ),
                                 DetailContainerWithIcon(
                                   icon: Icons.pool,
@@ -220,25 +246,38 @@ class _BuyPage extends State<BuyPage> {
                                       decoration: ShapeDecoration(
                                         color: const Color(0xFFD6CBBB),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
                                         ),
                                       ),
                                       child: ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => ChatPage1(
-                                                reciverUserEmail: apartmentData['SellerId'],
-                                                reciverUserid: apartmentData['SellerId'],
+                                        onPressed: () async {
+                                          String? sellerEmail =
+                                              await fetchSellerEmail(
+                                                  apartmentData['SellerId']);
+
+                                          if (sellerEmail != null) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ChatPage1(
+                                                  reciverUserEmail: sellerEmail,
+                                                  reciverUserid:
+                                                      apartmentData['SellerId'],
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                          } else {
+                                            print(
+                                                'Error fetching seller email.');
+                                          }
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFFD6CBBB),
+                                          backgroundColor:
+                                              const Color(0xFFD6CBBB),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(18),
+                                            borderRadius:
+                                                BorderRadius.circular(18),
                                           ),
                                         ),
                                         child: const Text(
@@ -250,7 +289,6 @@ class _BuyPage extends State<BuyPage> {
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                // Check if the type is 'rent' before displaying the Choose Payment button
                                 if (apartmentType.toLowerCase() == 'rent')
                                   Row(
                                     children: [
@@ -266,7 +304,8 @@ class _BuyPage extends State<BuyPage> {
                                         decoration: ShapeDecoration(
                                           color: const Color(0xFFD6CBBB),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(18),
+                                            borderRadius:
+                                                BorderRadius.circular(18),
                                           ),
                                         ),
                                         child: ElevatedButton(
@@ -274,14 +313,17 @@ class _BuyPage extends State<BuyPage> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ChoosePaymentPage(),
+                                                builder: (context) =>
+                                                    ChoosePaymentPage(),
                                               ),
                                             );
                                           },
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFFD6CBBB),
+                                            backgroundColor:
+                                                const Color(0xFFD6CBBB),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(18),
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
                                             ),
                                           ),
                                           child: const Text(

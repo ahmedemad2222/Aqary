@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/BuyPage.dart';
 import 'package:flutter_application_1/NavBar.dart' as NavBar;
+
 class ApartmentWidget extends StatelessWidget {
   final String name;
   final String price;
@@ -62,45 +64,46 @@ class _BrowsePageState extends State<BrowsePage> {
 
   bool _isLocationExpanded = false;
 
-  // List to store fetched data from Firebase
   List<Map<String, dynamic>> apartments = [];
-
-  List<String> _selectedLocations = []; // Store the selected locations
+  List<String> _selectedLocations = [];
+  String? _loggedInUserId;
 
   @override
   void initState() {
     super.initState();
-    // Call the function to fetch data when the widget is first initialized
+    _getLoggedInUserId();
     fetchData();
   }
 
-  // Function to fetch data from Firebase
+  Future<void> _getLoggedInUserId() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _loggedInUserId = user.uid;
+    }
+  }
+
   Future<void> fetchData() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference buildings = firestore.collection('Buildings');
 
     QuerySnapshot querySnapshot = await buildings.get();
 
-    // Clear the existing data before adding new data
     apartments.clear();
 
-    // Iterate through the documents and add them to the list
     querySnapshot.docs.forEach((document) {
       Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-      // Add the document ID to the data
       data['documentId'] = document.id;
 
-      // Check if the type matches the selected category and the location matches
       if ((_rentBuyIndex == 0 && data['Type'] == 'Rent' ||
               _rentBuyIndex == 1 && data['Type'] == 'Sell') &&
           (_selectedLocations.isEmpty ||
-              _selectedLocations.contains(data['Location']))) {
+              _selectedLocations.contains(data['Location'])) &&
+          (_loggedInUserId == null || data['SellerId'] != _loggedInUserId)) {
         apartments.add(data);
       }
     });
 
-    // Update the state to trigger a rebuild of the UI
     setState(() {});
   }
 
@@ -114,7 +117,6 @@ class _BrowsePageState extends State<BrowsePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Small Navigation Bar (Rent and Buy)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -129,20 +131,16 @@ class _BrowsePageState extends State<BrowsePage> {
               ],
             ),
           ),
-
-          // Main Content (Apartments)
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(16),
               itemCount: apartments.length,
               itemBuilder: (context, index) {
-                // Extract data from the list
                 String name = apartments[index]['Name'];
                 String price = 'Price: \$${apartments[index]['Price']}';
                 int bathrooms = (apartments[index]['Bathrooms']);
                 int bedrooms = (apartments[index]['rooms']);
 
-                // Get the building ID from the document ID
                 return GestureDetector(
                   onTap: () {
                     String buildingId = apartments[index]['documentId'];
@@ -155,8 +153,7 @@ class _BrowsePageState extends State<BrowsePage> {
                     );
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 16), // Adjust the bottom padding as needed
+                    padding: EdgeInsets.only(bottom: 16),
                     child: ApartmentWidget(
                       name: name,
                       price: price,
@@ -168,7 +165,6 @@ class _BrowsePageState extends State<BrowsePage> {
               },
             ),
           ),
-          // Location and Recents
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -242,15 +238,14 @@ class _BrowsePageState extends State<BrowsePage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
-          // Handle recent location click
           print('Recent Location: $location clicked');
           setState(() {
             if (_selectedLocations.contains(location)) {
-              _selectedLocations.remove(location); // Unselect the location
+              _selectedLocations.remove(location);
             } else {
               _selectedLocations.add(location);
             }
-            fetchData(); // Call fetchData when the location changes
+            fetchData();
           });
         },
         child: Text(
@@ -271,11 +266,10 @@ class _BrowsePageState extends State<BrowsePage> {
 
     return GestureDetector(
       onTap: () {
-        // Handle category button click
         print('Category: $category clicked');
         setState(() {
           _rentBuyIndex = category == 'Rent' ? 0 : 1;
-          fetchData(); // Call fetchData when the category changes
+          fetchData();
         });
       },
       child: Container(
@@ -287,7 +281,8 @@ class _BrowsePageState extends State<BrowsePage> {
         ),
         child: Text(
           category,
-          style: TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
+          style:
+              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
         ),
       ),
     );
