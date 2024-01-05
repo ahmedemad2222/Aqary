@@ -11,140 +11,165 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   int currentIndex = 2;
-  late String email = '';
-  late String name = '';
+  late String email;
+  late String name;
+  late TextEditingController nameController;
 
   @override
   void initState() {
     super.initState();
+    fetchData();
+    nameController = TextEditingController();
   }
 
-  // Function to fetch data from Firebase
-  Future<Map<String, dynamic>> fetchData() async {
+  Future<void> fetchData() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference users = firestore.collection('users');
 
-      // Get the current user
       User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // Use user.uid to get the UID
         DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
 
         if (documentSnapshot.exists) {
-          // Check if the document exists before accessing its data
           Map<String, dynamic> data =
               documentSnapshot.data() as Map<String, dynamic>;
-          email = data['email'] ?? 'No Email';
-          name = data['name'] ?? 'No Name';
-          return {'email': email, 'name': name};
+
+          setState(() {
+            email = data['email'] ?? 'No Email';
+            name = data['name'] ?? 'No Name';
+            nameController.text = name;
+          });
         } else {
           print('Document does not exist');
-          return {'email': 'No Email', 'name': 'No Name'};
+          setState(() {
+            email = 'No Email';
+            name = 'No Name';
+          });
         }
       } else {
         print('User not logged in');
-        return {'email': 'No Email', 'name': 'No Name'};
+        setState(() {
+          email = 'No Email';
+          name = 'No Name';
+        });
       }
-    } catch (e) {
-      print('Error fetching data: $e');
-      return {'email': 'No Email', 'name': 'No Name'};
+    } catch (e, stackTrace) {
+      print('Error in fetchData: $e');
+      print(stackTrace);
+    }
+  }
+
+  Future<void> _updateUserData(String field, String updatedValue) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference users = firestore.collection('users');
+
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Use field parameter to update the correct field in the database
+        await users.doc(user.uid).update({field.toLowerCase(): updatedValue});
+
+        setState(() {
+          if (field.toLowerCase() == 'name') {
+            name = updatedValue;
+            nameController.text = updatedValue;
+          } else if (field.toLowerCase() == 'email') {
+            email = updatedValue;
+          }
+        });
+
+        print('User data updated successfully');
+      } else {
+        print('User not logged in');
+      }
+    } catch (e, stackTrace) {
+      print('Error updating user data: $e');
+      print(stackTrace);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Color.fromARGB(255, 227, 183, 121),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: FutureBuilder(
-          future: fetchData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              // Data fetching is complete, update the email and name
-              email = snapshot.data?['email'] ?? 'No Email';
-              name = snapshot.data?['name'] ?? 'No Name';
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Your existing widget code...
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    color: Color.fromARGB(255, 227, 183, 121),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundImage:
-                              AssetImage('assets/profile_picture.jpg'),
-                        ),
-                        SizedBox(width: 16.0),
-                      ],
+    try {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Profile'),
+          backgroundColor: Color.fromARGB(255, 227, 183, 121),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.0),
+                color: Color.fromARGB(255, 227, 183, 121),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage:
+                          AssetImage('assets/profile_picture.jpg'),
                     ),
+                    SizedBox(width: 16.0),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(16.0),
+                color: Color.fromARGB(255, 227, 183, 121),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildProfileInfoRow(
+                        'Name', name, labelFontSize: 20.0, valueFontSize: 18.0),
+                    buildProfileInfoRow(
+                        'Email', email, labelFontSize: 20.0, valueFontSize: 18.0),
+                  ],
+                ),
+              ),
+              SizedBox(height: 70.0),
+              buildHelpAndSupportRow(),
+              SizedBox(height: 40.0),
+              buildAboutUsRow(),
+              SizedBox(height: 50.0),
+              ElevatedButton(
+                onPressed: () {
+                  _logout();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFF9CF93),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    color: Color.fromARGB(255, 227, 183, 121),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildProfileInfoRow('Name', name,
-                            labelFontSize: 20.0, valueFontSize: 18.0),
-                        buildProfileInfoRow('Email', email,
-                            labelFontSize: 20.0, valueFontSize: 18.0),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 70.0),
-                  buildHelpAndSupportRow(),
-                  SizedBox(height: 40.0),
-                  buildAboutUsRow(),
-                  SizedBox(height: 50.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      _logout();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF9CF93),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    ),
-                  ),
-                ],
-              );
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
-              // Still waiting for data
-              return Center(child: CircularProgressIndicator());
-            } else {
-              // An error occurred
-              return Center(child: Text('Error fetching data'));
-            }
+                ),
+                child: Text(
+                  'Logout',
+                  style: TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
           },
         ),
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-      ),
-    );
+      );
+    } catch (e, stackTrace) {
+      print('Error in build method: $e');
+      print(stackTrace);
+      // Return an error widget or an empty container as a fallback
+      return Container();
+    }
   }
-
-  // The rest of your class...
 
   Widget buildProfileInfoRow(String label, String value,
       {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
@@ -160,7 +185,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
               SizedBox(height: 8.0),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  _showEditDialog(label, value);
+                },
                 style: ElevatedButton.styleFrom(
                   primary: Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
@@ -226,21 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _showEditDialog(String label, String value) async {
-    TextEditingController? controller;
-
-    switch (label) {
-      case 'name':
-        controller = TextEditingController();
-        break;
-      case 'email':
-        controller = TextEditingController();
-        break;
-      case 'Phone':
-        controller = TextEditingController();
-        break;
-    }
-
-    controller ??= TextEditingController();
+    TextEditingController controller = TextEditingController();
     controller.text = value;
 
     await showDialog(
@@ -265,9 +278,14 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                String editedValue = controller?.text ?? '';
-                print('Edited $label: $editedValue');
+              onPressed: () async {
+                String updatedValue = controller.text.trim();
+
+                if (updatedValue.isNotEmpty) {
+                  // Update the data in the database
+                  await _updateUserData(label, updatedValue);
+                }
+
                 Navigator.pop(context);
               },
               child: Text('Save'),
