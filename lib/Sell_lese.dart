@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/HomeScreen.dart';
 import 'package:flutter_application_1/ImagePicker.dart';
 import 'package:flutter_application_1/ItemAdded.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Sell_lese extends StatefulWidget {
+  const Sell_lese({super.key});
+
   @override
   _Sell_leseState createState() => _Sell_leseState();
 }
@@ -29,6 +33,8 @@ class _Sell_leseState extends State<Sell_lese> {
   String Has_a_Pool = "No";
   String Building_Type = "Apartment";
 
+  List<XFile> _images = [];
+
   StepState getStepState(int step) {
     if (currentStep > step) {
       return StepState.complete;
@@ -39,14 +45,21 @@ class _Sell_leseState extends State<Sell_lese> {
     }
   }
 
-  void _navigateToImagePicker() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ImagePickerScreen(),
-      ),
-    );
+  void _navigateToImagePicker() async {
+  List<XFile>? selectedImages = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const ImagePickerScreen(),
+    ),
+  );
+
+  if (selectedImages != null && selectedImages.isNotEmpty) {
+    setState(() {
+      // Add the selected images to your existing list of images
+      _images.addAll(selectedImages);
+    });
   }
+}
 
   Future<void> _pickImage() async {
     try {
@@ -119,13 +132,14 @@ class _Sell_leseState extends State<Sell_lese> {
             Building_Type,
             locationController.text,
             int.parse(priceController.text),
+            _images
           );
 
           // After publishing the ad, navigate to another page
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ItemAdded(),
+              builder: (context) => const ItemAdded(),
             ),
           );
         }
@@ -133,7 +147,7 @@ class _Sell_leseState extends State<Sell_lese> {
     } else {
       // Highlight the step in red by updating the Stepper
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please fill all required fields in the current step.'),
           backgroundColor: Colors.red,
         ),
@@ -145,15 +159,15 @@ class _Sell_leseState extends State<Sell_lese> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sell Lese'),
-        backgroundColor: Color.fromARGB(255, 227, 183, 121),
+        title: const Text('Sell Lese'),
+        backgroundColor: const Color.fromARGB(255, 227, 183, 121),
       ),
       body: Stack(
         children: [
           Positioned.fill(
             child: Container(
               height: MediaQuery.of(context).size.height / 2.5,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/search_img.png'),
                   fit: BoxFit.cover,
@@ -161,7 +175,7 @@ class _Sell_leseState extends State<Sell_lese> {
               ),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 85,
             left: 48,
             child: Text(
@@ -177,7 +191,7 @@ class _Sell_leseState extends State<Sell_lese> {
           Positioned.fill(
             top: MediaQuery.of(context).size.height / 2.6,
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFF9CF93),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30),
@@ -199,7 +213,7 @@ class _Sell_leseState extends State<Sell_lese> {
                 steps: [
                   Step(
                     state: getStepState(0),
-                    title: Text(
+                    title: const Text(
                       'Step 1',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -207,11 +221,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'List property for:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -223,9 +237,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Sell'),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 5),
+                              const Text('Sell'),
+                              const SizedBox(width: 20),
                               Radio(
                                 value: 'Rent',
                                 groupValue: type,
@@ -235,27 +249,27 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Rent'),
+                              const SizedBox(width: 5),
+                              const Text('Rent'),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Add posting title:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           RoundedTextField(titleController),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Describe the property:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           RoundedTextField(descriptionController),
                           ElevatedButton(
                             onPressed: _navigateToImagePicker,
-                            child: Text('Pick Image'),
+                            child: const Text('Pick Image'),
                           ),
                         ],
                       ),
@@ -263,7 +277,7 @@ class _Sell_leseState extends State<Sell_lese> {
                   ),
                   Step(
                     state: getStepState(1),
-                    title: Text(
+                    title: const Text(
                       'Step 2',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -271,11 +285,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Rooms:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -291,17 +305,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Bathrooms:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -318,17 +332,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Kitchens:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               for (int i = 1; i <= 5; i++)
@@ -344,17 +358,17 @@ class _Sell_leseState extends State<Sell_lese> {
                                       },
                                     ),
                                     Text(i.toString()),
-                                    SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                   ],
                                 ),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Parking:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -366,9 +380,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Yes'),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 5),
+                              const Text('Yes'),
+                              const SizedBox(width: 20),
                               Radio(
                                 value: 'No',
                                 groupValue: Has_a_Parking,
@@ -378,16 +392,16 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('No'),
+                              const SizedBox(width: 5),
+                              const Text('No'),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Pool:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -399,9 +413,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Yes'),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 5),
+                              const Text('Yes'),
+                              const SizedBox(width: 20),
                               Radio(
                                 value: 'No',
                                 groupValue: Has_a_Pool,
@@ -411,8 +425,8 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('No'),
+                              const SizedBox(width: 5),
+                              const Text('No'),
                             ],
                           ),
                         ],
@@ -421,7 +435,7 @@ class _Sell_leseState extends State<Sell_lese> {
                   ),
                   Step(
                     state: getStepState(2),
-                    title: Text(
+                    title: const Text(
                       'Step 3',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -429,11 +443,11 @@ class _Sell_leseState extends State<Sell_lese> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Type:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Radio(
@@ -445,9 +459,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Apartment'),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 5),
+                              const Text('Apartment'),
+                              const SizedBox(width: 20),
                               Radio(
                                 value: 'Villa',
                                 groupValue: Building_Type,
@@ -457,9 +471,9 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Villa'),
-                              SizedBox(width: 20),
+                              const SizedBox(width: 5),
+                              const Text('Villa'),
+                              const SizedBox(width: 20),
                               Radio(
                                 value: 'Compound',
                                 groupValue: Building_Type,
@@ -469,23 +483,23 @@ class _Sell_leseState extends State<Sell_lese> {
                                   });
                                 },
                               ),
-                              SizedBox(width: 5),
-                              Text('Compound'),
+                              const SizedBox(width: 5),
+                              const Text('Compound'),
                             ],
                           ),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Location:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           RoundedTextField(locationController),
-                          SizedBox(height: 10),
-                          Text(
+                          const SizedBox(height: 10),
+                          const Text(
                             'Price:',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           RoundedTextField(priceController),
                         ],
                       ),
@@ -512,19 +526,19 @@ class _Sell_leseState extends State<Sell_lese> {
 class RoundedTextField extends StatelessWidget {
   final TextEditingController controller;
 
-  RoundedTextField(this.controller);
+  const RoundedTextField(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        color: Color(0xFFFEF4E7),
+        color: const Color(0xFFFEF4E7),
       ),
       child: TextFormField(
         controller: controller,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: 'Enter text',
           contentPadding: EdgeInsets.all(10.0),
           border: InputBorder.none,
@@ -548,10 +562,27 @@ class PublishAd {
     String propertyType,
     String location,
     int price,
+    List<XFile> images,
   ) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference buildings = firestore.collection('Buildings');
-    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+    List<String> imageUrls = [];
+
+    // Upload each image to Firestore and get the download URLs
+    for (XFile image in images) {
+      File file = File(image.path);
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      String filePath = 'Buildings/images/$fileName.jpg';
+
+      // Upload file to Firestore
+      Reference uploadRef = FirebaseStorage.instance.ref().child(filePath);
+      await uploadRef.putFile(file);
+
+      String downloadURL = await uploadRef.getDownloadURL();
+      imageUrls.add(downloadURL);
+    }
 
     await buildings.add({
       'SellerId': UserID,
@@ -566,6 +597,7 @@ class PublishAd {
       'PropertyType': propertyType,
       'Location': location,
       'Price': price,
+      'Images': imageUrls,
     });
 
     print('Ad published to Firestore!');
