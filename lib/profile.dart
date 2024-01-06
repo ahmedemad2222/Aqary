@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/ThemeProvider.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -69,7 +71,6 @@ class _ProfilePageState extends State<ProfilePage> {
       User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // Use field parameter to update the correct field in the database
         await users.doc(user.uid).update({field.toLowerCase(): updatedValue});
 
         setState(() {
@@ -93,85 +94,86 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Profile'),
-          backgroundColor: Color.fromARGB(255, 227, 183, 121),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color.fromARGB(255, 227, 183, 121),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundImage:
-                          AssetImage('assets/profile_picture.jpg'),
-                    ),
-                    SizedBox(width: 16.0),
-                  ],
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color.fromARGB(255, 227, 183, 121),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildProfileInfoRow(
-                        'Name', name, labelFontSize: 20.0, valueFontSize: 18.0),
-                    buildProfileInfoRow(
-                        'Email', email, labelFontSize: 20.0, valueFontSize: 18.0),
-                  ],
-                ),
-              ),
-              SizedBox(height: 70.0),
-              buildHelpAndSupportRow(),
-              SizedBox(height: 40.0),
-              buildAboutUsRow(),
-              SizedBox(height: 50.0),
-              ElevatedButton(
-                onPressed: () {
-                  _logout();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFF9CF93),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+    bool isDarkMode = context.watch<ThemeProvider>().isDarkMode;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
+        backgroundColor: Color.fromARGB(255, 227, 183, 121),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            buildDarkLightToggle(isDarkMode),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              color: isDarkMode
+                  ? Colors.black
+                  : Color.fromARGB(255, 227, 183, 121),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/profile_picture.jpg'),
                   ),
-                ),
-                child: Text(
-                  'Logout',
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
+                  SizedBox(width: 16.0),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              color: isDarkMode
+                  ? Colors.black
+                  : Color.fromARGB(255, 227, 183, 121),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildProfileInfoRow(
+                      'Name', name, isDarkMode,
+                      labelFontSize: 20.0, valueFontSize: 18.0),
+                  buildProfileInfoRow(
+                      'Email', email, isDarkMode,
+                      labelFontSize: 20.0, valueFontSize: 18.0),
+                ],
+              ),
+            ),
+            SizedBox(height: 70.0),
+            buildHelpAndSupportRow(isDarkMode),
+            SizedBox(height: 40.0),
+            buildAboutUsRow(isDarkMode),
+            SizedBox(height: 50.0),
+            ElevatedButton(
+              onPressed: () {
+                _logout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFF9CF93),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
-            ],
-          ),
+              child: Text(
+                'Logout',
+                style: TextStyle(fontSize: 20.0, color: Colors.white),
+              ),
+            ),
+          ],
         ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          currentIndex: currentIndex,
-          onTap: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
-        ),
-      );
-    } catch (e, stackTrace) {
-      print('Error in build method: $e');
-      print(stackTrace);
-      // Return an error widget or an empty container as a fallback
-      return Container();
-    }
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
+      ),
+    );
   }
 
-  Widget buildProfileInfoRow(String label, String value,
+  Widget buildProfileInfoRow(String label, String value, bool isDarkMode,
       {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -189,14 +191,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   _showEditDialog(label, value);
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 255, 255, 255),
+                  primary: isDarkMode
+                      ? Colors.grey[800]
+                      : Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 child: Text(
                   value,
-                  style: TextStyle(fontSize: valueFontSize, color: Colors.black),
+                  style: TextStyle(
+                      fontSize: valueFontSize,
+                      color: isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
             ],
@@ -212,14 +218,18 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget buildHelpAndSupportRow() {
+  Widget buildHelpAndSupportRow(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.help, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.help,
+                size: 30.0,
+                color: isDarkMode
+                    ? Colors.grey[800]
+                    : Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'Help & Support',
@@ -227,19 +237,27 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0,
+            color: isDarkMode
+                ? Colors.grey[800]
+                : Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
 
-  Widget buildAboutUsRow() {
+  Widget buildAboutUsRow(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.info, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.info,
+                size: 30.0,
+                color: isDarkMode
+                    ? Colors.grey[800]
+                    : Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'About Us',
@@ -247,7 +265,11 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0,
+            color: isDarkMode
+                ? Colors.grey[800]
+                : Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
@@ -282,7 +304,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 String updatedValue = controller.text.trim();
 
                 if (updatedValue.isNotEmpty) {
-                  // Update the data in the database
                   await _updateUserData(label, updatedValue);
                 }
 
@@ -293,6 +314,26 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         );
       },
+    );
+  }
+
+  Widget buildDarkLightToggle(bool isDarkMode) {
+    return GestureDetector(
+      onTap: () {
+        context.read<ThemeProvider>().toggleDarkMode();
+      },
+      child: Container(
+        height: 50.0,
+        color: isDarkMode ? Colors.black : Colors.white,
+        alignment: Alignment.center,
+        child: Text(
+          isDarkMode ? 'Dark Mode' : 'Light Mode',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 
