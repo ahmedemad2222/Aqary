@@ -63,6 +63,7 @@ class _BrowsePageState extends State<BrowsePage> {
   int _rentBuyIndex = 0;
 
   bool _isLocationExpanded = false;
+  bool _sortAscending = true; // Added flag for sorting order
 
   List<Map<String, dynamic>> apartments = [];
   List<String> _selectedLocations = [];
@@ -104,7 +105,91 @@ class _BrowsePageState extends State<BrowsePage> {
       }
     });
 
+    // Sort apartments based on price and sorting order
+    apartments.sort((a, b) {
+      int result = a['Price'].compareTo(b['Price']);
+      return _sortAscending ? result : -result;
+    });
+
     setState(() {});
+  }
+
+  Widget _buildSortButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _sortAscending = !_sortAscending;
+          fetchData();
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(12),
+          color: Color(0xFFF9CF93),
+        ),
+        child: Icon(
+          _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryButton(String category) {
+    bool isSelected = category == (_rentBuyIndex == 0 ? 'Rent' : 'Buy');
+
+    return GestureDetector(
+      onTap: () {
+        print('Category: $category clicked');
+        setState(() {
+          _rentBuyIndex = category == 'Rent' ? 0 : 1;
+          fetchData();
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? Color(0xFFF9CF93) : null,
+        ),
+        child: Text(
+          category,
+          style:
+              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentLocation(String location) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          print('Recent Location: $location clicked');
+          setState(() {
+            if (_selectedLocations.contains(location)) {
+              _selectedLocations.remove(location);
+            } else {
+              _selectedLocations.add(location);
+            }
+            fetchData();
+          });
+        },
+        child: Text(
+          location,
+          style: TextStyle(
+            fontSize: 14,
+            color: _selectedLocations.contains(location)
+                ? Colors.blue
+                : Colors.black,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -131,6 +216,7 @@ class _BrowsePageState extends State<BrowsePage> {
               ],
             ),
           ),
+          _buildSortButton(), // Added sort button
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(16),
@@ -229,61 +315,6 @@ class _BrowsePageState extends State<BrowsePage> {
             _mainNavigationBarIndex = index;
           });
         },
-      ),
-    );
-  }
-
-  Widget _buildRecentLocation(String location) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () {
-          print('Recent Location: $location clicked');
-          setState(() {
-            if (_selectedLocations.contains(location)) {
-              _selectedLocations.remove(location);
-            } else {
-              _selectedLocations.add(location);
-            }
-            fetchData();
-          });
-        },
-        child: Text(
-          location,
-          style: TextStyle(
-            fontSize: 14,
-            color: _selectedLocations.contains(location)
-                ? Colors.blue
-                : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryButton(String category) {
-    bool isSelected = category == (_rentBuyIndex == 0 ? 'Rent' : 'Buy');
-
-    return GestureDetector(
-      onTap: () {
-        print('Category: $category clicked');
-        setState(() {
-          _rentBuyIndex = category == 'Rent' ? 0 : 1;
-          fetchData();
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected ? Color(0xFFF9CF93) : null,
-        ),
-        child: Text(
-          category,
-          style:
-              TextStyle(fontSize: 16, color: isSelected ? Colors.black : null),
-        ),
       ),
     );
   }
