@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/ThemeProvider.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -11,50 +13,89 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   int currentIndex = 2;
-  late String email = '';
-  late String name = '';
+  late String email;
+  late String name;
+  late TextEditingController nameController;
 
   @override
   void initState() {
     super.initState();
+    fetchData();
+    nameController = TextEditingController();
   }
 
-  // Function to fetch data from Firebase
-  Future<Map<String, dynamic>> fetchData() async {
+  Future<void> fetchData() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference users = firestore.collection('users');
 
-      // Get the current user
       User? user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // Use user.uid to get the UID
         DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
 
         if (documentSnapshot.exists) {
-          // Check if the document exists before accessing its data
           Map<String, dynamic> data =
               documentSnapshot.data() as Map<String, dynamic>;
-          email = data['email'] ?? 'No Email';
-          name = data['name'] ?? 'No Name';
-          return {'email': email, 'name': name};
+
+          setState(() {
+            email = data['email'] ?? 'No Email';
+            name = data['name'] ?? 'No Name';
+            nameController.text = name;
+          });
         } else {
           print('Document does not exist');
-          return {'email': 'No Email', 'name': 'No Name'};
+          setState(() {
+            email = 'No Email';
+            name = 'No Name';
+          });
         }
       } else {
         print('User not logged in');
-        return {'email': 'No Email', 'name': 'No Name'};
+        setState(() {
+          email = 'No Email';
+          name = 'No Name';
+        });
       }
-    } catch (e) {
-      print('Error fetching data: $e');
-      return {'email': 'No Email', 'name': 'No Name'};
+    } catch (e, stackTrace) {
+      print('Error in fetchData: $e');
+      print(stackTrace);
+    }
+  }
+
+  Future<void> _updateUserData(String field, String updatedValue) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference users = firestore.collection('users');
+
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        await users.doc(user.uid).update({field.toLowerCase(): updatedValue});
+
+        setState(() {
+          if (field.toLowerCase() == 'name') {
+            name = updatedValue;
+            nameController.text = updatedValue;
+          } else if (field.toLowerCase() == 'email') {
+            email = updatedValue;
+          }
+        });
+
+        print('User data updated successfully');
+      } else {
+        print('User not logged in');
+      }
+    } catch (e, stackTrace) {
+      print('Error updating user data: $e');
+      print(stackTrace);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
@@ -62,75 +103,63 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: FutureBuilder(
-          future: fetchData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              // Data fetching is complete, update the email and name
-              email = snapshot.data?['email'] ?? 'No Email';
-              name = snapshot.data?['name'] ?? 'No Name';
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            buildDarkLightToggle(isDarkMode),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              color: isDarkMode
+                  ? Colors.black
+                  : Color.fromARGB(255, 227, 183, 121),
+              child: Row(
                 children: [
-                  // Your existing widget code...
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    color: Color.fromARGB(255, 227, 183, 121),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundImage:
-                              AssetImage('assets/profile_picture.jpg'),
-                        ),
-                        SizedBox(width: 16.0),
-                      ],
-                    ),
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/profile_picture.jpg'),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    color: Color.fromARGB(255, 227, 183, 121),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildProfileInfoRow('Name', name,
-                            labelFontSize: 20.0, valueFontSize: 18.0),
-                        buildProfileInfoRow('Email', email,
-                            labelFontSize: 20.0, valueFontSize: 18.0),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 70.0),
-                  buildHelpAndSupportRow(),
-                  SizedBox(height: 40.0),
-                  buildAboutUsRow(),
-                  SizedBox(height: 50.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      _logout();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF9CF93),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(fontSize: 20.0, color: Colors.white),
-                    ),
-                  ),
+                  SizedBox(width: 16.0),
                 ],
-              );
-            } else if (snapshot.connectionState == ConnectionState.waiting) {
-              // Still waiting for data
-              return Center(child: CircularProgressIndicator());
-            } else {
-              // An error occurred
-              return Center(child: Text('Error fetching data'));
-            }
-          },
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              color: isDarkMode
+                  ? Colors.black
+                  : Color.fromARGB(255, 227, 183, 121),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildProfileInfoRow(
+                      'Name', name, isDarkMode,
+                      labelFontSize: 20.0, valueFontSize: 18.0),
+                  buildProfileInfoRow(
+                      'Email', email, isDarkMode,
+                      labelFontSize: 20.0, valueFontSize: 18.0),
+                ],
+              ),
+            ),
+            SizedBox(height: 70.0),
+            buildHelpAndSupportRow(isDarkMode),
+            SizedBox(height: 40.0),
+            buildAboutUsRow(isDarkMode),
+            SizedBox(height: 50.0),
+            ElevatedButton(
+              onPressed: () {
+                _logout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFF9CF93),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              child: Text(
+                'Logout',
+                style: TextStyle(fontSize: 20.0, color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -144,9 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // The rest of your class...
-
-  Widget buildProfileInfoRow(String label, String value,
+  Widget buildProfileInfoRow(String label, String value, bool isDarkMode,
       {double labelFontSize = 16.0, double valueFontSize = 16.0}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -160,16 +187,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
               SizedBox(height: 8.0),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  _showEditDialog(label, value);
+                },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 255, 255, 255),
+                  primary: isDarkMode
+                      ? Colors.grey[800]
+                      : Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 child: Text(
                   value,
-                  style: TextStyle(fontSize: valueFontSize, color: Colors.black),
+                  style: TextStyle(
+                      fontSize: valueFontSize,
+                      color: isDarkMode ? Colors.white : Colors.black),
                 ),
               ),
             ],
@@ -185,14 +218,18 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget buildHelpAndSupportRow() {
+  Widget buildHelpAndSupportRow(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.help, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.help,
+                size: 30.0,
+                color: isDarkMode
+                    ? Colors.grey[800]
+                    : Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'Help & Support',
@@ -200,19 +237,27 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0,
+            color: isDarkMode
+                ? Colors.grey[800]
+                : Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
 
-  Widget buildAboutUsRow() {
+  Widget buildAboutUsRow(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.info, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+            Icon(Icons.info,
+                size: 30.0,
+                color: isDarkMode
+                    ? Colors.grey[800]
+                    : Color.fromARGB(255, 219, 177, 118)),
             SizedBox(width: 16.0),
             Text(
               'About Us',
@@ -220,27 +265,17 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        Icon(Icons.arrow_forward_ios, size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        Icon(Icons.arrow_forward_ios,
+            size: 30.0,
+            color: isDarkMode
+                ? Colors.grey[800]
+                : Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
 
   Future<void> _showEditDialog(String label, String value) async {
-    TextEditingController? controller;
-
-    switch (label) {
-      case 'name':
-        controller = TextEditingController();
-        break;
-      case 'email':
-        controller = TextEditingController();
-        break;
-      case 'Phone':
-        controller = TextEditingController();
-        break;
-    }
-
-    controller ??= TextEditingController();
+    TextEditingController controller = TextEditingController();
     controller.text = value;
 
     await showDialog(
@@ -265,9 +300,13 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                String editedValue = controller?.text ?? '';
-                print('Edited $label: $editedValue');
+              onPressed: () async {
+                String updatedValue = controller.text.trim();
+
+                if (updatedValue.isNotEmpty) {
+                  await _updateUserData(label, updatedValue);
+                }
+
                 Navigator.pop(context);
               },
               child: Text('Save'),
@@ -275,6 +314,26 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         );
       },
+    );
+  }
+
+  Widget buildDarkLightToggle(bool isDarkMode) {
+    return GestureDetector(
+      onTap: () {
+        context.read<ThemeProvider>().toggleDarkMode();
+      },
+      child: Container(
+        height: 50.0,
+        color: isDarkMode ? Colors.black : Colors.white,
+        alignment: Alignment.center,
+        child: Text(
+          isDarkMode ? 'Dark Mode' : 'Light Mode',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 

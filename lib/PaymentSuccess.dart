@@ -9,10 +9,6 @@ class PaymentSuccessPage extends StatefulWidget {
 }
 
 class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,10 +17,15 @@ class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 400,
-              width: 400,
-              child: Image.asset('assets/Confirmed.png'),
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                double imageSize = constraints.maxWidth > 400 ? 400 : constraints.maxWidth;
+                return Container(
+                  height: imageSize,
+                  width: imageSize,
+                  child: Image.asset('assets/Confirmed.png'),
+                );
+              },
             ),
             Container(
               child: Column(
