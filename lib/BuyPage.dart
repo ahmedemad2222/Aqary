@@ -17,6 +17,7 @@ class BuyPage extends StatefulWidget {
 
 class _BuyPage extends State<BuyPage> {
   int currentIndex = 0;
+  int piccurrentIndex = 0;
   late Future<Map<String, dynamic>> apartmentData;
   late GoogleMapController mapController;
 
@@ -74,22 +75,38 @@ class _BuyPage extends State<BuyPage> {
             
             // Retrieve the 'Type' property
             String apartmentType = apartmentData['Type'] ?? '';
+            
+            // Retrieve the list of image URLs
+            List<String>? imageUrls = List<String>.from(apartmentData['Images']);
 
             return Stack(
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
+                Positioned.fill(
+                  top: -190,
                   child: ClipRRect(
                     child: Container(
-                      height: 300,
+                      height: 100,
                       width: double.infinity,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/buypage.jpg'),
-                          fit: BoxFit.cover,
-                        ),
+                      child: PageView.builder(
+                        itemCount: imageUrls.length,
+                        controller: PageController(initialPage: 0),
+                        onPageChanged: (picindex) {
+                          setState(() {
+                            piccurrentIndex = picindex;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return Container(
+                            width: 200,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(imageUrls[index]),
+                                fit: BoxFit.fitWidth, 
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -102,14 +119,14 @@ class _BuyPage extends State<BuyPage> {
                     child: Container(
                       height: 145,
                       width: double.infinity,
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(23),
                           topRight: Radius.circular(23),
                           bottomLeft: Radius.zero,
                           bottomRight: Radius.zero,
                         ),
-                        color: Color(0xFFF9CF93),
+                        color: const Color(0xFFF9CF93),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -185,7 +202,7 @@ class _BuyPage extends State<BuyPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 DetailContainerWithIcon(
-                                  icon: Icons.room,
+                                  icon: Icons.bed,
                                   text: '${apartmentData['rooms']} Rooms',
                                 ),
                                 DetailContainerWithIcon(
@@ -274,7 +291,7 @@ class _BuyPage extends State<BuyPage> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => ChoosePaymentPage(),
+                                                builder: (context) => const ChoosePaymentPage(),
                                               ),
                                             );
                                           },
@@ -315,20 +332,12 @@ class _BuyPage extends State<BuyPage> {
       ),
     );
   }
-}
-
-class DetailContainerWithIcon extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const DetailContainerWithIcon({
-    required this.icon,
-    required this.text,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  
+  // Definition of DetailContainerWithIcon widget
+  Widget DetailContainerWithIcon({
+    required IconData icon,
+    required String text,
+  }) {
     return Container(
       width: 71,
       height: 93,
