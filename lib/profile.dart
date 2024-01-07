@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/OfferedApartments.dart';
 import 'package:flutter_application_1/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
@@ -190,7 +191,9 @@ class _ProfilePageState extends State<ProfilePage> {
           buildHelpAndSupportRow(isDarkMode),
           const SizedBox(height: 40.0),
           buildAboutUsRow(isDarkMode),
-          const SizedBox(height: 50.0),
+          const SizedBox(height: 40.0),
+          buildOfferedApartments(),
+          SizedBox(height: 40.0),
           ElevatedButton(
             onPressed: () {
               _logout();
@@ -310,6 +313,34 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? Colors.grey[800]
                 : const Color.fromARGB(255, 219, 177, 118)),
       ],
+    );
+  }
+
+    Widget buildOfferedApartments() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => OfferedApartments()));
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(Icons.home,
+                  size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+              SizedBox(width: 16.0),
+              Text(
+                'My Apartments',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Icon(Icons.arrow_forward_ios,
+              size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        ],
+      ),
     );
   }
 
