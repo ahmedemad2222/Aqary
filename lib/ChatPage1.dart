@@ -26,6 +26,8 @@ class _ChatPage1State extends State<ChatPage1> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -67,12 +69,43 @@ class _ChatPage1State extends State<ChatPage1> {
       platformChannelSpecifics,
     );
   }
+  void _handleNotificationTap(RemoteMessage message) {
+    // Extract information from the FCM message
+    final String senderId = message.data['senderId']; // Assuming you include senderId in the FCM payload
+    final String senderEmail = message.data['senderEmail']; // Assuming you include senderEmail in the FCM payload
+
+    // Navigate to the chat page with the necessary parameters
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage1(
+          reciverUserid: senderId,
+          reciverUserEmail: senderEmail,
+        ),
+      ),
+    );
+  }
+  Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+  print("Handling background message: ${message.notification?.title}");
+
+  // You can customize the notification title and body based on your needs
+  String title = message.notification?.title ?? "New Message";
+  String body = message.notification?.body ?? "You have a new message";
+
+  // Show local notification when the app is in the background or terminated
+  _showLocalNotification(title, body);
+
+  // Handle navigation to the chat page when the notification is tapped
+  _handleNotificationTap(message);
+}
 
   void _configureFCM() {
     // Configure FCM
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
       // Handle incoming FCM message when the app is in the foreground
       _showLocalNotification(message.notification?.title, message.notification?.body);
+      
     });
 
   void _handleNotificationTap(RemoteMessage message) {
