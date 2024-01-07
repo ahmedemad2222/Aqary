@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ImagePickerScreen extends StatefulWidget {
-  const ImagePickerScreen({super.key});
+  const ImagePickerScreen({Key? key}) : super(key: key);
 
   @override
   _ImagePickerScreenState createState() => _ImagePickerScreenState();
@@ -17,19 +15,19 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
   final CollectionReference _apartmentsCollection =
       FirebaseFirestore.instance.collection('Buildings');
 
-  Future<void> _pickImages() async {
+  Future<void> _pickImages({int? maxImages}) async {
     List<XFile> resultList = [];
     try {
-      for (int i = 0; i < 3; i++) {
-        XFile? pickedFile = await ImagePicker().pickImage(
+      XFile? pickedFile;
+      do {
+        pickedFile = await ImagePicker().pickImage(
           source: ImageSource.gallery,
         );
 
         if (pickedFile != null) {
           resultList.add(pickedFile);
         }
-      }
-
+      } while (pickedFile != null && (maxImages == null || resultList.length < maxImages));
     } catch (e) {
       print('Error picking images: $e');
     }
@@ -40,18 +38,15 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
       _images = resultList;
     });
 
-    // Upload images to a specific apartment in Firestore
-    // for (XFile image in _images) {
-    //   await _uploadImageToFirestore(image, 'Buildings');
-    // }
     Navigator.pop(context, _images);
   }
 
-  Future<void> _uploadImageToFirestore(XFile image, String images,String Category) async {
+  Future<void> _uploadImageToFirestore(XFile image, String images, String Category) async {
     try {
       File file = File(image.path);
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = 'Buildings/$images/images/$fileName.jpg';
+
       // Upload file to Firestore
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         await _apartmentsCollection.doc(images).collection('images').add({
@@ -86,7 +81,7 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _pickImages,
+        onPressed: () => _pickImages(maxImages: null),
         tooltip: 'Pick Images',
         child: const Icon(Icons.photo_library),
       ),

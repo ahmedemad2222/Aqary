@@ -7,14 +7,17 @@ import 'package:flutter_application_1/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   int currentIndex = 2;
-  late String email;
-  late String name;
+  late String email = '';
+  late String name = '';
+  late String profileImageUrl = '';
   late TextEditingController nameController;
   bool dataLoaded = false;
 
@@ -43,6 +46,10 @@ class _ProfilePageState extends State<ProfilePage> {
             setState(() {
               email = data['email'] ?? 'No Email';
               name = data['name'] ?? 'No Name';
+              List<String>? imageUrls = List<String>.from(data['imageUrls']);
+              profileImageUrl = (imageUrls != null && imageUrls.isNotEmpty)
+                  ? imageUrls[0]
+                  : 'USER_PROFILE_IMAGE';
               nameController.text = name;
               dataLoaded = true;
             });
@@ -51,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
             setState(() {
               email = 'No Email';
               name = 'No Name';
+              profileImageUrl = 'USER_PROFILE_IMAGE';
               dataLoaded = true;
             });
           }
@@ -59,6 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
           setState(() {
             email = 'No Email';
             name = 'No Name';
+            profileImageUrl = 'USER_PROFILE_IMAGE';
             dataLoaded = true;
           });
         }
@@ -106,17 +115,17 @@ class _ProfilePageState extends State<ProfilePage> {
       // Show a loading indicator while data is being fetched
       return Scaffold(
         appBar: AppBar(
-          title: Text('Profile'),
-          backgroundColor: Color.fromARGB(255, 227, 183, 121),
+          title: const Text('Profile'),
+          backgroundColor: const Color.fromARGB(255, 227, 183, 121),
         ),
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Color.fromARGB(255, 227, 183, 121),
+        title: const Text('Profile'),
+        backgroundColor: const Color.fromARGB(255, 227, 183, 121),
       ),
       body: buildProfilePage(isDarkMode),
       bottomNavigationBar: CustomBottomNavigationBar(
@@ -138,25 +147,25 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           buildDarkLightToggle(isDarkMode),
           Container(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             color: isDarkMode
                 ? Colors.black
-                : Color.fromARGB(255, 227, 183, 121),
+                : const Color.fromARGB(255, 227, 183, 121),
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/profile_picture.jpg'),
+                  radius: 50.0,
+                  backgroundImage: NetworkImage(profileImageUrl),
                 ),
                 SizedBox(width: 16.0),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             color: isDarkMode
                 ? Colors.black
-                : Color.fromARGB(255, 227, 183, 121),
+                : const Color.fromARGB(255, 227, 183, 121),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -177,22 +186,22 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
-          SizedBox(height: 70.0),
+          const SizedBox(height: 70.0),
           buildHelpAndSupportRow(isDarkMode),
-          SizedBox(height: 40.0),
+          const SizedBox(height: 40.0),
           buildAboutUsRow(isDarkMode),
-          SizedBox(height: 50.0),
+          const SizedBox(height: 50.0),
           ElevatedButton(
             onPressed: () {
               _logout();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFF9CF93),
+              backgroundColor: const Color(0xFFF9CF93),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Logout',
               style: TextStyle(fontSize: 20.0, color: Colors.white),
             ),
@@ -213,16 +222,17 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
-              SizedBox(height: 8.0),
+                  style:
+                      TextStyle(fontSize: labelFontSize, color: Colors.white)),
+              const SizedBox(height: 8.0),
               ElevatedButton(
                 onPressed: () {
                   _showEditDialog(label, value);
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: isDarkMode
+                  backgroundColor: isDarkMode
                       ? Colors.grey[800]
-                      : Color.fromARGB(255, 255, 255, 255),
+                      : const Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -237,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
           IconButton(
-            icon: Icon(Icons.edit),
+            icon: const Icon(Icons.edit),
             onPressed: () {
               _showEditDialog(label, value);
             },
@@ -258,9 +268,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 30.0,
                 color: isDarkMode
                     ? Colors.grey[800]
-                    : Color.fromARGB(255, 219, 177, 118)),
-            SizedBox(width: 16.0),
-            Text(
+                    : const Color.fromARGB(255, 219, 177, 118)),
+            const SizedBox(width: 16.0),
+            const Text(
               'Help & Support',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
@@ -270,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
             size: 30.0,
             color: isDarkMode
                 ? Colors.grey[800]
-                : Color.fromARGB(255, 219, 177, 118)),
+                : const Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
@@ -286,9 +296,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 30.0,
                 color: isDarkMode
                     ? Colors.grey[800]
-                    : Color.fromARGB(255, 219, 177, 118)),
-            SizedBox(width: 16.0),
-            Text(
+                    : const Color.fromARGB(255, 219, 177, 118)),
+            const SizedBox(width: 16.0),
+            const Text(
               'About Us',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
@@ -298,7 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
             size: 30.0,
             color: isDarkMode
                 ? Colors.grey[800]
-                : Color.fromARGB(255, 219, 177, 118)),
+                : const Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
@@ -320,13 +330,14 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
@@ -338,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -369,7 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _logout() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Login')),
+      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Login')),
       (route) => false,
     );
   }
