@@ -16,46 +16,52 @@ class _ProfilePageState extends State<ProfilePage> {
   late String email;
   late String name;
   late TextEditingController nameController;
+  bool dataLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
     nameController = TextEditingController();
+    fetchData();
   }
 
   Future<void> fetchData() async {
     try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference users = firestore.collection('users');
+      if (!dataLoaded) {
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        CollectionReference users = firestore.collection('users');
 
-      User? user = FirebaseAuth.instance.currentUser;
+        User? user = FirebaseAuth.instance.currentUser;
 
-      if (user != null) {
-        DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
+        if (user != null) {
+          DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
 
-        if (documentSnapshot.exists) {
-          Map<String, dynamic> data =
-              documentSnapshot.data() as Map<String, dynamic>;
+          if (documentSnapshot.exists) {
+            Map<String, dynamic> data =
+                documentSnapshot.data() as Map<String, dynamic>;
 
-          setState(() {
-            email = data['email'] ?? 'No Email';
-            name = data['name'] ?? 'No Name';
-            nameController.text = name;
-          });
+            setState(() {
+              email = data['email'] ?? 'No Email';
+              name = data['name'] ?? 'No Name';
+              nameController.text = name;
+              dataLoaded = true;
+            });
+          } else {
+            print('Document does not exist');
+            setState(() {
+              email = 'No Email';
+              name = 'No Name';
+              dataLoaded = true;
+            });
+          }
         } else {
-          print('Document does not exist');
+          print('User not logged in');
           setState(() {
             email = 'No Email';
             name = 'No Name';
+            dataLoaded = true;
           });
         }
-      } else {
-        print('User not logged in');
-        setState(() {
-          email = 'No Email';
-          name = 'No Name';
-        });
       }
     } catch (e, stackTrace) {
       print('Error in fetchData: $e');
@@ -96,72 +102,23 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     bool isDarkMode = context.watch<ThemeProvider>().isDarkMode;
 
+    if (!dataLoaded) {
+      // Show a loading indicator while data is being fetched
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Profile'),
+          backgroundColor: Color.fromARGB(255, 227, 183, 121),
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
         backgroundColor: Color.fromARGB(255, 227, 183, 121),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            buildDarkLightToggle(isDarkMode),
-            Container(
-              padding: EdgeInsets.all(16.0),
-              color: isDarkMode
-                  ? Colors.black
-                  : Color.fromARGB(255, 227, 183, 121),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/profile_picture.jpg'),
-                  ),
-                  SizedBox(width: 16.0),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.all(16.0),
-              color: isDarkMode
-                  ? Colors.black
-                  : Color.fromARGB(255, 227, 183, 121),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildProfileInfoRow(
-                      'Name', name, isDarkMode,
-                      labelFontSize: 20.0, valueFontSize: 18.0),
-                  buildProfileInfoRow(
-                      'Email', email, isDarkMode,
-                      labelFontSize: 20.0, valueFontSize: 18.0),
-                ],
-              ),
-            ),
-            SizedBox(height: 70.0),
-            buildHelpAndSupportRow(isDarkMode),
-            SizedBox(height: 40.0),
-            buildAboutUsRow(isDarkMode),
-            SizedBox(height: 50.0),
-            ElevatedButton(
-              onPressed: () {
-                _logout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFF9CF93),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              child: Text(
-                'Logout',
-                style: TextStyle(fontSize: 20.0, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: buildProfilePage(isDarkMode),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -169,6 +126,78 @@ class _ProfilePageState extends State<ProfilePage> {
             currentIndex = index;
           });
         },
+      ),
+    );
+  }
+
+  Widget buildProfilePage(bool isDarkMode) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildDarkLightToggle(isDarkMode),
+          Container(
+            padding: EdgeInsets.all(16.0),
+            color: isDarkMode
+                ? Colors.black
+                : Color.fromARGB(255, 227, 183, 121),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: AssetImage('assets/profile_picture.jpg'),
+                ),
+                SizedBox(width: 16.0),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.all(16.0),
+            color: isDarkMode
+                ? Colors.black
+                : Color.fromARGB(255, 227, 183, 121),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildProfileInfoRow(
+                  'Name',
+                  name ?? 'Loading...',
+                  isDarkMode,
+                  labelFontSize: 20.0,
+                  valueFontSize: 18.0,
+                ),
+                buildProfileInfoRow(
+                  'Email',
+                  email ?? 'Loading...',
+                  isDarkMode,
+                  labelFontSize: 20.0,
+                  valueFontSize: 18.0,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 70.0),
+          buildHelpAndSupportRow(isDarkMode),
+          SizedBox(height: 40.0),
+          buildAboutUsRow(isDarkMode),
+          SizedBox(height: 50.0),
+          ElevatedButton(
+            onPressed: () {
+              _logout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFF9CF93),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            child: Text(
+              'Logout',
+              style: TextStyle(fontSize: 20.0, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
