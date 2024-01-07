@@ -176,7 +176,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
           leading: CircleAvatar(
             backgroundImage: NetworkImage(profilePictureUrl),
           ),
-          title: Text(data['email'] ?? 'Unknown Email'),
+          title: Text(data['name'] ?? 'Unknown Email'),
           subtitle: Text(lastMessage),
           onTap: () {
             Navigator.push(

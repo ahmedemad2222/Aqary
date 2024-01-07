@@ -229,7 +229,7 @@ class _BuyPage extends State<BuyPage> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) => ChatPage1(
-                                                reciverUserEmail: apartmentData['SellerId'],
+                                                reciverUserEmail: apartmentData['Name'],
                                                 reciverUserid: apartmentData['SellerId'],
                                               ),
                                             ),
