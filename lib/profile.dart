@@ -3,59 +3,75 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/LoginPage.dart';
 import 'package:flutter_application_1/NavBar.dart';
+import 'package:flutter_application_1/OfferedApartments.dart';
 import 'package:flutter_application_1/ThemeProvider.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   int currentIndex = 2;
-  late String email;
-  late String name;
+  late String email = '';
+  late String name = '';
+  late String profileImageUrl = '';
   late TextEditingController nameController;
+  bool dataLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
     nameController = TextEditingController();
+    fetchData();
   }
 
   Future<void> fetchData() async {
     try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference users = firestore.collection('users');
+      if (!dataLoaded) {
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        CollectionReference users = firestore.collection('users');
 
-      User? user = FirebaseAuth.instance.currentUser;
+        User? user = FirebaseAuth.instance.currentUser;
 
-      if (user != null) {
-        DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
+        if (user != null) {
+          DocumentSnapshot documentSnapshot = await users.doc(user.uid).get();
 
-        if (documentSnapshot.exists) {
-          Map<String, dynamic> data =
-              documentSnapshot.data() as Map<String, dynamic>;
+          if (documentSnapshot.exists) {
+            Map<String, dynamic> data =
+                documentSnapshot.data() as Map<String, dynamic>;
 
-          setState(() {
-            email = data['email'] ?? 'No Email';
-            name = data['name'] ?? 'No Name';
-            nameController.text = name;
-          });
+            setState(() {
+              email = data['email'] ?? 'No Email';
+              name = data['name'] ?? 'No Name';
+              List<String>? imageUrls = List<String>.from(data['imageUrls']);
+              profileImageUrl = (imageUrls != null && imageUrls.isNotEmpty)
+                  ? imageUrls[0]
+                  : 'USER_PROFILE_IMAGE';
+              nameController.text = name;
+              dataLoaded = true;
+            });
+          } else {
+            print('Document does not exist');
+            setState(() {
+              email = 'No Email';
+              name = 'No Name';
+              profileImageUrl = 'USER_PROFILE_IMAGE';
+              dataLoaded = true;
+            });
+          }
         } else {
-          print('Document does not exist');
+          print('User not logged in');
           setState(() {
             email = 'No Email';
             name = 'No Name';
+            profileImageUrl = 'USER_PROFILE_IMAGE';
+            dataLoaded = true;
           });
         }
-      } else {
-        print('User not logged in');
-        setState(() {
-          email = 'No Email';
-          name = 'No Name';
-        });
       }
     } catch (e, stackTrace) {
       print('Error in fetchData: $e');
@@ -96,72 +112,23 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     bool isDarkMode = context.watch<ThemeProvider>().isDarkMode;
 
+    if (!dataLoaded) {
+      // Show a loading indicator while data is being fetched
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Profile'),
+          backgroundColor: const Color.fromARGB(255, 227, 183, 121),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Color.fromARGB(255, 227, 183, 121),
+        title: const Text('Profile'),
+        backgroundColor: const Color.fromARGB(255, 227, 183, 121),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            buildDarkLightToggle(isDarkMode),
-            Container(
-              padding: EdgeInsets.all(16.0),
-              color: isDarkMode
-                  ? Colors.black
-                  : Color.fromARGB(255, 227, 183, 121),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/profile_picture.jpg'),
-                  ),
-                  SizedBox(width: 16.0),
-                ],
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.all(16.0),
-              color: isDarkMode
-                  ? Colors.black
-                  : Color.fromARGB(255, 227, 183, 121),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildProfileInfoRow(
-                      'Name', name, isDarkMode,
-                      labelFontSize: 20.0, valueFontSize: 18.0),
-                  buildProfileInfoRow(
-                      'Email', email, isDarkMode,
-                      labelFontSize: 20.0, valueFontSize: 18.0),
-                ],
-              ),
-            ),
-            SizedBox(height: 70.0),
-            buildHelpAndSupportRow(isDarkMode),
-            SizedBox(height: 40.0),
-            buildAboutUsRow(isDarkMode),
-            SizedBox(height: 50.0),
-            ElevatedButton(
-              onPressed: () {
-                _logout();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFF9CF93),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              child: Text(
-                'Logout',
-                style: TextStyle(fontSize: 20.0, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: buildProfilePage(isDarkMode),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -169,6 +136,80 @@ class _ProfilePageState extends State<ProfilePage> {
             currentIndex = index;
           });
         },
+      ),
+    );
+  }
+
+  Widget buildProfilePage(bool isDarkMode) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildDarkLightToggle(isDarkMode),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            color: isDarkMode
+                ? Colors.black
+                : const Color.fromARGB(255, 227, 183, 121),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 50.0,
+                  backgroundImage: NetworkImage(profileImageUrl),
+                ),
+                SizedBox(width: 16.0),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            color: isDarkMode
+                ? Colors.black
+                : const Color.fromARGB(255, 227, 183, 121),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildProfileInfoRow(
+                  'Name',
+                  name ?? 'Loading...',
+                  isDarkMode,
+                  labelFontSize: 20.0,
+                  valueFontSize: 18.0,
+                ),
+                buildProfileInfoRow(
+                  'Email',
+                  email ?? 'Loading...',
+                  isDarkMode,
+                  labelFontSize: 20.0,
+                  valueFontSize: 18.0,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 70.0),
+          buildHelpAndSupportRow(isDarkMode),
+          const SizedBox(height: 40.0),
+          buildAboutUsRow(isDarkMode),
+          const SizedBox(height: 40.0),
+          buildOfferedApartments(),
+          SizedBox(height: 40.0),
+          ElevatedButton(
+            onPressed: () {
+              _logout();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF9CF93),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            child: const Text(
+              'Logout',
+              style: TextStyle(fontSize: 20.0, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -184,16 +225,17 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(fontSize: labelFontSize, color: Colors.white)),
-              SizedBox(height: 8.0),
+                  style:
+                      TextStyle(fontSize: labelFontSize, color: Colors.white)),
+              const SizedBox(height: 8.0),
               ElevatedButton(
                 onPressed: () {
                   _showEditDialog(label, value);
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: isDarkMode
+                  backgroundColor: isDarkMode
                       ? Colors.grey[800]
-                      : Color.fromARGB(255, 255, 255, 255),
+                      : const Color.fromARGB(255, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -208,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
           IconButton(
-            icon: Icon(Icons.edit),
+            icon: const Icon(Icons.edit),
             onPressed: () {
               _showEditDialog(label, value);
             },
@@ -229,9 +271,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 30.0,
                 color: isDarkMode
                     ? Colors.grey[800]
-                    : Color.fromARGB(255, 219, 177, 118)),
-            SizedBox(width: 16.0),
-            Text(
+                    : const Color.fromARGB(255, 219, 177, 118)),
+            const SizedBox(width: 16.0),
+            const Text(
               'Help & Support',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
@@ -241,7 +283,7 @@ class _ProfilePageState extends State<ProfilePage> {
             size: 30.0,
             color: isDarkMode
                 ? Colors.grey[800]
-                : Color.fromARGB(255, 219, 177, 118)),
+                : const Color.fromARGB(255, 219, 177, 118)),
       ],
     );
   }
@@ -257,9 +299,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 size: 30.0,
                 color: isDarkMode
                     ? Colors.grey[800]
-                    : Color.fromARGB(255, 219, 177, 118)),
-            SizedBox(width: 16.0),
-            Text(
+                    : const Color.fromARGB(255, 219, 177, 118)),
+            const SizedBox(width: 16.0),
+            const Text(
               'About Us',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
@@ -269,8 +311,36 @@ class _ProfilePageState extends State<ProfilePage> {
             size: 30.0,
             color: isDarkMode
                 ? Colors.grey[800]
-                : Color.fromARGB(255, 219, 177, 118)),
+                : const Color.fromARGB(255, 219, 177, 118)),
       ],
+    );
+  }
+
+    Widget buildOfferedApartments() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => OfferedApartments()));
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(Icons.home,
+                  size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+              SizedBox(width: 16.0),
+              Text(
+                'My Apartments',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Icon(Icons.arrow_forward_ios,
+              size: 30.0, color: Color.fromARGB(255, 219, 177, 118)),
+        ],
+      ),
     );
   }
 
@@ -291,13 +361,14 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
@@ -309,7 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -340,7 +411,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _logout() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Login')),
+      MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Login')),
       (route) => false,
     );
   }

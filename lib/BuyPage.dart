@@ -20,12 +20,15 @@ class _BuyPage extends State<BuyPage> {
   int piccurrentIndex = 0;
   late Future<Map<String, dynamic>> apartmentData;
   late GoogleMapController mapController;
+  bool isFavorite = false; // Added favorite state
+
 
   @override
   void initState() {
     super.initState();
     apartmentData = fetchApartmentData();
   }
+  
 
   Future<Map<String, dynamic>> fetchApartmentData() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -84,6 +87,21 @@ class _BuyPage extends State<BuyPage> {
               Navigator.pop(context);
             },
           ),
+        actions: [
+            // Favorite Button
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: Colors.red,
+              ),
+              onPressed: () {
+                setState(() {
+                  isFavorite = !isFavorite;
+                });
+              },
+            ),
+          ],
+        
         ),
         body: FutureBuilder<Map<String, dynamic>>(
           future: apartmentData,
@@ -108,7 +126,7 @@ class _BuyPage extends State<BuyPage> {
                 Positioned.fill(
                   top: -190,
                   child: ClipRRect(
-                    child: Container(
+                    child: SizedBox(
                       height: 100,
                       width: double.infinity,
                       child: PageView.builder(
@@ -143,14 +161,14 @@ class _BuyPage extends State<BuyPage> {
                     child: Container(
                       height: 145,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(23),
                           topRight: Radius.circular(23),
                           bottomLeft: Radius.zero,
                           bottomRight: Radius.zero,
                         ),
-                        color: const Color(0xFFF9CF93),
+                        color: Color(0xFFF9CF93),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
