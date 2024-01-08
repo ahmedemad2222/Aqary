@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Browse.dart';
 import 'package:flutter_application_1/ThemeProvider.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 import 'package:flutter_application_1/splashScreen.dart';
@@ -20,7 +19,7 @@ void main() async {
           return MaterialApp(
             theme: context.watch<ThemeProvider>().themeData,
             debugShowCheckedModeBanner: false,
-            home: SplashScreen(),
+            home: const SplashScreen(),
           );
         },
       ),
@@ -29,12 +28,14 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: context.watch<ThemeProvider>().themeData,
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }
