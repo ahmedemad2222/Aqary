@@ -5,6 +5,8 @@ import 'package:flutter_application_1/ChatService.dart';
 import 'package:flutter_application_1/HomeScreen.dart';
 import 'package:flutter_application_1/NavBar.dart';
 import 'package:flutter_application_1/profile.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ChatPage1 extends StatefulWidget {
   final String reciverUserEmail;
@@ -24,6 +26,122 @@ class _ChatPage1State extends State<ChatPage1> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize FCM
+    _configureFCM();
+    _initLocalNotifications();
+    // Rest of your existing initState code...
+  }
+  void _initLocalNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    //final IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings();
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      //iOS: initializationSettingsIOS,
+    );
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+  void _showLocalNotification(String? title, String? body) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'Aqary_chat_message', // my channel ID
+      'Aqary Chat Message', // my channel name
+      //'You received a message in Aqary', // my channel description
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      title ?? 'Aqary has a New Message for you', // Notification title
+      body ?? 'You have a new message', // Notification body
+      platformChannelSpecifics,
+    );
+  }
+  void _handleNotificationTap(RemoteMessage message) {
+    // Extract information from the FCM message
+    final String senderId = message.data['senderId']; // Assuming you include senderId in the FCM payload
+    final String senderEmail = message.data['senderEmail']; // Assuming you include senderEmail in the FCM payload
+
+    // Navigate to the chat page with the necessary parameters
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage1(
+          reciverUserid: senderId,
+          reciverUserEmail: senderEmail,
+        ),
+      ),
+    );
+  }
+  Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+  print("Handling background message: ${message.notification?.title}");
+
+  // You can customize the notification title and body based on your needs
+  String title = message.notification?.title ?? "New Message";
+  String body = message.notification?.body ?? "You have a new message";
+
+  // Show local notification when the app is in the background or terminated
+  _showLocalNotification(title, body);
+
+  // Handle navigation to the chat page when the notification is tapped
+  _handleNotificationTap(message);
+}
+
+  void _configureFCM() {
+    // Configure FCM
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+      // Handle incoming FCM message when the app is in the foreground
+      _showLocalNotification(message.notification?.title, message.notification?.body);
+      
+    });
+
+  void _handleNotificationTap(RemoteMessage message) {
+  // Extract information from the FCM message
+  final String senderId = message.data['senderId']; // Assuming you include senderId in the FCM payload
+  final String senderEmail = message.data['senderEmail']; // Assuming you include senderEmail in the FCM payload
+
+  // Navigate to the chat page with the necessary parameters
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ChatPage1(
+        reciverUserid: senderId,
+        reciverUserEmail: senderEmail,
+      ),
+    ),
+  );
+  }
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      // Handle notification when the app is opened from a terminated state
+      // You can navigate to the chat page or handle it as needed
+      _handleNotificationTap(message);
+    });
+    _firebaseMessaging.getToken().then((token) {
+    print("FCM Token: $token");
+    // Send this token to your server for targeted messaging
+  });
+  
+
+    // Retrieve FCM token
+    _firebaseMessaging.getToken().then((token) {
+      print("FCM Token: $token");
+      // Send this token to your server for targeted messaging
+    });
+  }
+
 
   void SendMessage() async {
     if (_messageController.text.isNotEmpty) {

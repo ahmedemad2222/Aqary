@@ -348,7 +348,7 @@ class _BuyPage extends State<BuyPage> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => const ChoosePaymentPage(),
+                                                builder: (context) => ChoosePaymentPage(),
                                               ),
                                             );
                                           },
